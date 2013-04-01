@@ -15,6 +15,7 @@ Snake = function(){
 	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200));
+	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200));
 	
 	this.getTail = function(){
 		return this.body[this.body.length - 1];
@@ -22,6 +23,17 @@ Snake = function(){
 	
 	this.getHead = function(){
 		return this.body[0];
+	};
+	
+	this.move = function(move){
+		var current_head = this.getHead();
+		var new_head = new Segment(current_head.x + move[0], current_head.y + move[1]);
+		
+		this.body.pop();
+		
+		var new_body = [new_head];
+		[].push.apply(new_body, this.body);
+		this.body = new_body;
 	};
 };
 
@@ -31,11 +43,11 @@ SnakeDrawer = function(_canvas, _snake){
 	var context = canvas.getContext('2d');
 	var snake = _snake;
 	
-	this.draw_head = function(s){
-		this.draw_segment(s, "red");
+	this.drawHead = function(s){
+		this.drawSegment(s, "red");
 	};
 	
-	this.draw_segment = function(s, color){
+	this.drawSegment = function(s, color){
 		context.beginPath();
 		context.moveTo(s.x, s.y);
 		context.rect(s.x, s.y, SEGMENT_SIZE, SEGMENT_SIZE);
@@ -43,7 +55,7 @@ SnakeDrawer = function(_canvas, _snake){
 		context.fill();
 	};
 	
-	this.erase_segment = function(s){
+	this.eraseSegment = function(s){
 		context.beginPath();
 		context.moveTo(s.x, s.y);
 		context.clearRect(s.x - 0.5, s.y - 0.5, SEGMENT_SIZE + 1, SEGMENT_SIZE + 1);
@@ -51,18 +63,19 @@ SnakeDrawer = function(_canvas, _snake){
 	};
 	
 	this.initDraw = function(){
+		var colors = ["#5CA315", "#69B81A",  "#74CC1D", "#81DE23", "#8BF026", "#92FA2A", "#A2FF45"];
 		canvas.width = canvas.width;
-		this.draw_head(snake.body[0]);
-		for(var i = 1; i < snake.body.length; i++){
-			this.draw_segment(snake.body[i]);
+		//this.drawHead(snake.body[0]);
+		for(var i = 0; i < snake.body.length; i++){
+			this.drawSegment(snake.body[i], colors[i]);
 		}		
 	};
 	
 	var lastTail = snake.getTail();
 	
 	this.update = function(){
-		this.draw_head(snake.getHead());
-		this.erase_segment(lastTail);
+		this.drawHead(snake.getHead());
+		this.eraseSegment(lastTail);
 		lastTail = snake.getTail();
 	};
 	
@@ -80,15 +93,16 @@ SnakeGame = function(canvas){
 		
 	};
 	
-	var ILLEGAL_MOVE = null; //TODO
+	var ARROWS_CODES = {
+		UP: 38,
+		DOWN: 40,
+		LEFT: 37,
+		RIGHT: 39,
+	};
+	
+	var ILLEGAL_MOVE = ARROWS_CODES.RIGHT;
+	
 	var keyDownEvent = function(e){
-		
-		var ARROWS_CODES = {
-			UP: 38,
-			DOWN: 40,
-			LEFT: 37,
-			RIGHT: 39,
-		};
 		
 		var MOVES = {};
 		MOVES[ARROWS_CODES.UP] = [0, -20];
@@ -109,16 +123,7 @@ SnakeGame = function(canvas){
 		}
 		
 		ILLEGAL_MOVE = OPPOSITE_MOVE_MAP[e.keyCode];
-		
-		var current_head = snake.getHead();
-		var new_head = new Segment(current_head.x + current_move[0], current_head.y + current_move[1]);
-		
-		snake.body.pop();
-		
-		var new_body = [new_head];
-		[].push.apply(new_body, snake.body);
-		snake.body = new_body;
-		
+		snake.move(current_move);
 		snakeDrawer.initDraw();
 	};
 	
