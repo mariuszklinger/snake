@@ -1,6 +1,8 @@
 var SEGMENT_SIZE = 20;
+var BOARD_W,
+	BOARD_H;
 
-Segment = function(x, y, next, prev){
+Segment = function(x, y){
 	this.x = x;
 	this.y = y;
 };
@@ -11,7 +13,7 @@ Snake = function(){
 	
 	this.body.push(new Segment(300, 200));
 	
-	this.body.push(new Segment(300 + SEGMENT_SIZE, 200));
+	this.body.push(new Segment(300 + 1 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200));
@@ -25,9 +27,36 @@ Snake = function(){
 		return this.body[0];
 	};
 	
+	this.isMoveCrossBoard = function(move){
+		return ((move.x < 0) || (move.y < 0) || (move.x >= BOARD_W) || (move.y >= BOARD_H));
+	};
+	
+	this.teleport = function(move){
+		if(move.x < 0){
+			move.x = BOARD_W + move.x;
+		}
+		
+		if(move.y < 0){
+			move.y = BOARD_H + move.y;
+		}
+		
+		if(move.x >= BOARD_W){
+			move.x = move.x - BOARD_W;
+		}
+		
+		if(move.y >= BOARD_H){
+			move.y = move.y - BOARD_H;
+		}
+		
+	};
+	
 	this.move = function(move){
 		var current_head = this.getHead();
 		var new_head = new Segment(current_head.x + move[0], current_head.y + move[1]);
+		
+		if(this.isMoveCrossBoard(new_head)){
+			this.teleport(new_head);
+		}
 		
 		this.body.pop();
 		
@@ -83,13 +112,18 @@ SnakeDrawer = function(_canvas, _snake){
 
 SnakeGame = function(canvas){
 	
+	BOARD_W = canvas.width,
+	BOARD_H = canvas.height;
+	
 	var snake = new Snake();
 	var snakeDrawer = new SnakeDrawer(canvas, snake);
 	snakeDrawer.initDraw();
 	
 	var collisionDetect = function(segment){
-		// czy nie w siebie
-		// czy nie w innego
+
+	};
+	
+	var teleportSnake = function(){
 		
 	};
 	
