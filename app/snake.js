@@ -95,8 +95,6 @@ var Snake = function(snakeGameBoardBuffer){
 		
 		this.updateBuffer();
 	};
-	
-	this.updateBuffer();
 };
 
 var SnakeGameBoardBuffer = function(){
@@ -113,15 +111,16 @@ var SnakeGameBoardBuffer = function(){
 	this.deleteSegment = function(s){
 		var to_erase = board[s.y / SEGMENT_SIZE][s.x / SEGMENT_SIZE];
 		to_erase.type = Segment.SEGMENT_TYPES.BLANK;
+		to_erase.color = Segment.SEGMENT_TYPES.BLANK.color;
 		to_erase.changed = true;
 	};
 	
 	this.putSegment = function(s){
-		board[s.x / SEGMENT_SIZE][s.y / SEGMENT_SIZE] = s;
+		board[s.y / SEGMENT_SIZE][s.x / SEGMENT_SIZE] = s;
 	};
 	
 	this.getSegment = function(x, y){
-		return board[x][y];
+		return board[y][x];
 	};
 	
 };
@@ -142,7 +141,7 @@ var SnakeGameDrawer = function(_canvas, _snakeGameBoardBuffer){
 	};
 	
 	this.update = function(){
-		
+
 		for(var y = 0; y < BLOCKS_Y; y++){
 			for(var x = 0; x < BLOCKS_X; x++){
 				
@@ -171,10 +170,6 @@ var SnakeGame = function(canvas){
 	var snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
 	snakeGameDrawer.update();
 	
-	var collisionDetect = function(segment){
-
-	};
-	
 	var ARROWS_CODES = {
 		UP: 38,
 		DOWN: 40,
@@ -193,13 +188,13 @@ var SnakeGame = function(canvas){
 	
 	var keyDownEvent = function(e){
 		
-		//putRandomBlock();
+		putRandomBlock();
 		
 		var MOVES = {};
-		MOVES[ARROWS_CODES.UP] = [0, -20];
-		MOVES[ARROWS_CODES.DOWN] = [0, 20];
-		MOVES[ARROWS_CODES.RIGHT] = [20, 0];
-		MOVES[ARROWS_CODES.LEFT] = [-20, 0];
+		MOVES[ARROWS_CODES.UP] = [0, -SEGMENT_SIZE];
+		MOVES[ARROWS_CODES.DOWN] = [0, SEGMENT_SIZE];
+		MOVES[ARROWS_CODES.RIGHT] = [SEGMENT_SIZE, 0];
+		MOVES[ARROWS_CODES.LEFT] = [-SEGMENT_SIZE, 0];
 		
 		// map used to block "turn back" snake
 		var OPPOSITE_MOVE_MAP = {};
