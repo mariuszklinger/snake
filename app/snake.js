@@ -15,10 +15,12 @@ var Segment = function(x, y, type){
 
 Segment.SEGMENT_TYPES = {
 	BLANK: {
+		id: 1,
 		color: "#FFF",
 	},
 	
 	RED_BLOCK: {
+		id: 2,
 		color: "#F23",
 	},
 };
@@ -34,6 +36,27 @@ var Snake = function(snakeGameBoardBuffer){
 	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200));
 	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200));
+	
+	var snakeGameCollisionDetector = (function(_snakeGameBoardBuffer){
+		var snakeGameBoardBuffer = _snakeGameBoardBuffer;
+		
+		this.processMove = function(head){
+
+			var block = snakeGameBoardBuffer.getSegment(head.x / SEGMENT_SIZE, head.y / SEGMENT_SIZE);
+			
+			switch (block.type.id) {
+				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
+					//alert("BLOCK");
+					return true;
+					break;
+		
+				default:
+					break;
+			}
+		};
+		
+		return this;
+	})(snakeGameBoardBuffer);
 	
 	this.getTail = function(){
 		return this.body[this.body.length - 1];
@@ -78,23 +101,21 @@ var Snake = function(snakeGameBoardBuffer){
 	
 	this.move = function(move){
 		var current_head = this.getHead();
-		var new_head = new Segment(current_head.x + move[0], current_head.y + move[1]);
+		var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1]);
 		
-		if(this.isMoveCrossBoard(new_head)){
-			this.teleport(new_head);
+		if(this.isMoveCrossBoard(new_head_segment)){
+			this.teleport(new_head_segment);
 		}
 		
-		// cut off snake's tail
-		snakeGameBoardBuffer.deleteSegment(this.body.pop());
+		// cut off snake's tail or eat new segment
+		!snakeGameCollisionDetector.processMove(new_head_segment) && snakeGameBoardBuffer.deleteSegment(this.body.pop());
 		
-		var new_body = [new_head];
+		var new_body = [new_head_segment];
 		[].push.apply(new_body, this.body);
 		this.body = new_body;
 		
 		this.updateBuffer();
 	};
-	
-	this.updateBuffer();
 };
 
 var SnakeGameBoardBuffer = function(){
@@ -171,6 +192,7 @@ var SnakeGame = function(canvas){
 	
 	var snakeGameBoardBuffer = new SnakeGameBoardBuffer();
 	var snake = new Snake(snakeGameBoardBuffer);
+	snake.updateBuffer();
 	var snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
 	
 	snakeGameDrawer.update();
@@ -182,18 +204,18 @@ var SnakeGame = function(canvas){
 		RIGHT: 39,
 	};
 	
+	snakeGameBoardBuffer.putSegment(new Segment(0, 0, Segment.SEGMENT_TYPES.RED_BLOCK));
 	var putRandomBlock = function(){
 		var x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		var y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		
 		snakeGameBoardBuffer.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
 	};
+	putRandomBlock();putRandomBlock();putRandomBlock();
 	
 	var ILLEGAL_MOVE = ARROWS_CODES.RIGHT;
 	
 	var keyDownEvent = function(e){
-		
-		putRandomBlock();
 		
 		var MOVES = {};
 		MOVES[ARROWS_CODES.UP] = [0, -SEGMENT_SIZE];
