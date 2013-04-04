@@ -7,7 +7,6 @@ var Segment = function(x, y, type){
 	this.y = y;
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
 	this.color = null;
-	this.changed = true;
 	
 	this.getColor = function(){
 		return this.type.color;
@@ -72,7 +71,6 @@ var Snake = function(snakeGameBoardBuffer){
 		for(var i = 0; i < this.body.length; i++){
 			var current_segment = this.body[i];
 			current_segment.color = colors[i] || colors[colors.length - 1];
-			current_segment.changed = true;
 			
 			snakeGameBoardBuffer.putSegment(current_segment);
 		}
@@ -95,10 +93,13 @@ var Snake = function(snakeGameBoardBuffer){
 		
 		this.updateBuffer();
 	};
+	
+	this.updateBuffer();
 };
 
 var SnakeGameBoardBuffer = function(){
 	var board = [];
+	var to_update = [];
 	
 	for(var y = 0; y < BLOCKS_Y; y++){
 		board[y] = [];
@@ -112,11 +113,17 @@ var SnakeGameBoardBuffer = function(){
 		var to_erase = board[s.y / SEGMENT_SIZE][s.x / SEGMENT_SIZE];
 		to_erase.type = Segment.SEGMENT_TYPES.BLANK;
 		to_erase.color = Segment.SEGMENT_TYPES.BLANK.color;
-		to_erase.changed = true;
+		
+		to_update.push(to_erase);
 	};
 	
 	this.putSegment = function(s){
 		board[s.y / SEGMENT_SIZE][s.x / SEGMENT_SIZE] = s;
+		to_update.push(s);
+	};
+	
+	this.getSegmentsToUpdate = function(){
+		return to_update;
 	};
 	
 	this.getSegment = function(x, y){
@@ -141,17 +148,15 @@ var SnakeGameDrawer = function(_canvas, _snakeGameBoardBuffer){
 	};
 	
 	this.update = function(){
+		
+		var to_change = snakeGameBoardBuffer.getSegmentsToUpdate();
 
-		for(var y = 0; y < BLOCKS_Y; y++){
-			for(var x = 0; x < BLOCKS_X; x++){
-				
-				var current_segment = snakeGameBoardBuffer.getSegment(x, y);
-				if(current_segment.changed){
-					this.drawSegment(current_segment);
-					current_segment.changed = false;
-				};
-			};
+		for(var i in to_change){
+			var current_segment = to_change[i]; 
+			this.drawSegment(current_segment);
 		};
+		
+		to_change.length = 0;
 	};
 	
 };
@@ -166,8 +171,8 @@ var SnakeGame = function(canvas){
 	
 	var snakeGameBoardBuffer = new SnakeGameBoardBuffer();
 	var snake = new Snake(snakeGameBoardBuffer);
-	snake.updateBuffer();
 	var snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
+	
 	snakeGameDrawer.update();
 	
 	var ARROWS_CODES = {
