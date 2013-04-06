@@ -6,7 +6,7 @@ var Segment = function(x, y, type){
 	this.x = x;
 	this.y = y;
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
-	this.color = null;
+	this.color = undefined;
 	
 	this.getColor = function(){
 		return this.type.color;
@@ -23,22 +23,38 @@ Segment.SEGMENT_TYPES = {
 		id: 2,
 		color: "#F23",
 	},
+	
+	SNAKE: {
+		id: 3,
+		color: null,
+	},
 };
 
 var Snake = function(snakeGameBoardBuffer){
 	
 	this.body = [];
 	
-	this.body.push(new Segment(300, 200));
+	this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+	this.body.push(new Segment(300 + 1 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
 	
-	this.body.push(new Segment(300 + 1 * SEGMENT_SIZE, 200));
-	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200));
-	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200));
-	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200));
-	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200));
+	this.SNAKE_STATES = {
+		LIVE: 1,
+		DEAD: 2,
+	};
+	
+	//var putRandomBlock2 = putRandomBlock;
 	
 	var snakeGameCollisionDetector = (function(_snakeGameBoardBuffer){
 		var snakeGameBoardBuffer = _snakeGameBoardBuffer;
+		
+		this.COLLISION_STATES = {
+			SNAKE: 1,
+			EATABLE_BLOCK: 2,
+		};
 		
 		this.processMove = function(head){
 
@@ -46,10 +62,18 @@ var Snake = function(snakeGameBoardBuffer){
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					//alert("BLOCK");
-					return true;
+					putRandomBlock();
+					return snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK;
+					break;
+					
+				case Segment.SEGMENT_TYPES.SNAKE.id:
+					//alert("kolizja!");
+					return snakeGameCollisionDetector.COLLISION_STATES.SNAKE;
 					break;
 		
+				case Segment.SEGMENT_TYPES.BLANK.id:
+					return false;
+					break;
 				default:
 					break;
 			}
@@ -101,20 +125,26 @@ var Snake = function(snakeGameBoardBuffer){
 	
 	this.move = function(move){
 		var current_head = this.getHead();
-		var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1]);
+		var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1], Segment.SEGMENT_TYPES.SNAKE);
 		
 		if(this.isMoveCrossBoard(new_head_segment)){
 			this.teleport(new_head_segment);
 		}
 		
 		// cut off snake's tail or eat new segment
-		!snakeGameCollisionDetector.processMove(new_head_segment) && snakeGameBoardBuffer.deleteSegment(this.body.pop());
+		if(snakeGameCollisionDetector.processMove(new_head_segment) !== snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
+			snakeGameBoardBuffer.deleteSegment(this.body.pop());
+		}
 		
 		var new_body = [new_head_segment];
 		[].push.apply(new_body, this.body);
 		this.body = new_body;
 		
 		this.updateBuffer();
+	};
+	
+	this.die = function(){
+		
 	};
 };
 
@@ -197,15 +227,15 @@ var SnakeGame = function(canvas){
 	
 	snakeGameDrawer.update();
 	
-	var ARROWS_CODES = {
-		UP: 38,
-		DOWN: 40,
-		LEFT: 37,
-		RIGHT: 39,
+	var WSAD_CODES = {
+		UP: 87,
+		DOWN: 83,
+		LEFT: 65,
+		RIGHT: 68,
 	};
 	
 	snakeGameBoardBuffer.putSegment(new Segment(0, 0, Segment.SEGMENT_TYPES.RED_BLOCK));
-	var putRandomBlock = function(){
+	putRandomBlock = function(){
 		var x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		var y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		
@@ -213,23 +243,23 @@ var SnakeGame = function(canvas){
 	};
 	putRandomBlock();putRandomBlock();putRandomBlock();
 	
-	var ILLEGAL_MOVE = ARROWS_CODES.RIGHT;
+	var ILLEGAL_MOVE = WSAD_CODES.RIGHT;
 	
 	var keyDownEvent = function(e){
 		
 		var MOVES = {};
-		MOVES[ARROWS_CODES.UP] = [0, -SEGMENT_SIZE];
-		MOVES[ARROWS_CODES.DOWN] = [0, SEGMENT_SIZE];
-		MOVES[ARROWS_CODES.RIGHT] = [SEGMENT_SIZE, 0];
-		MOVES[ARROWS_CODES.LEFT] = [-SEGMENT_SIZE, 0];
+		MOVES[WSAD_CODES.UP] = [0, -SEGMENT_SIZE];
+		MOVES[WSAD_CODES.DOWN] = [0, SEGMENT_SIZE];
+		MOVES[WSAD_CODES.RIGHT] = [SEGMENT_SIZE, 0];
+		MOVES[WSAD_CODES.LEFT] = [-SEGMENT_SIZE, 0];
 		
 		// map used to block "turn back" snake
 		var OPPOSITE_MOVE_MAP = {};
-		OPPOSITE_MOVE_MAP[ARROWS_CODES.UP] = ARROWS_CODES.DOWN;
-		OPPOSITE_MOVE_MAP[ARROWS_CODES.DOWN] = ARROWS_CODES.UP;
-		OPPOSITE_MOVE_MAP[ARROWS_CODES.LEFT] = ARROWS_CODES.RIGHT;
-		OPPOSITE_MOVE_MAP[ARROWS_CODES.RIGHT] = ARROWS_CODES.LEFT;
-		
+		OPPOSITE_MOVE_MAP[WSAD_CODES.UP] = WSAD_CODES.DOWN;
+		OPPOSITE_MOVE_MAP[WSAD_CODES.DOWN] = WSAD_CODES.UP;
+		OPPOSITE_MOVE_MAP[WSAD_CODES.LEFT] = WSAD_CODES.RIGHT;
+		OPPOSITE_MOVE_MAP[WSAD_CODES.RIGHT] = WSAD_CODES.LEFT;
+
 		var current_move = MOVES[e.keyCode];
 		if(!current_move || (e.keyCode === ILLEGAL_MOVE)){
 			return;
