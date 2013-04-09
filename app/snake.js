@@ -37,7 +37,6 @@ Segment.SEGMENT_TYPES = {
 
 var Snake = function(snakeGameBoardBuffer){
 	
-	
 	var snake = this;
 	
 	this.body = [];
@@ -54,7 +53,7 @@ var Snake = function(snakeGameBoardBuffer){
 		DEAD: 2,
 	};
 	
-	//var putRandomBlock2 = putRandomBlock;
+	this.status = this.SNAKE_STATES.LIVE;
 	
 	var snakeGameCollisionDetector = (function(_snakeGameBoardBuffer){
 		var snakeGameBoardBuffer = _snakeGameBoardBuffer;
@@ -75,7 +74,6 @@ var Snake = function(snakeGameBoardBuffer){
 					break;
 					
 				case Segment.SEGMENT_TYPES.SNAKE.id:
-					//alert("kolizja!");
 					snake.die();
 					return snakeGameCollisionDetector.COLLISION_STATES.SNAKE;
 					break;
@@ -160,22 +158,24 @@ var Snake = function(snakeGameBoardBuffer){
 	};
 	
 	this.die = function(){
+		
+		var dead_colors = ["#D1D1D1", "#BAB6B8", "#A3A0A1", "#878686", "#6B6A6A", "#525252"];
 		for(var b in this.body){
 			
-			var current_block = this.body[b];
+			var cb = this.body[b];
 			
-			//(function(){
-				//var interval = setInterval(function(){
-			
-					current_block.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
-					current_block.color = Segment.SEGMENT_TYPES.DEAD_SNAKE.color;
-					snakeGameBoardBuffer.putSegment(current_block);
+			(function(cb, b){
+				setTimeout(function(){
+					cb.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
+					cb.color = dead_colors[b] || dead_colors[dead_colors.length - 1];
 					
-					console.info(current_block.x + ", " + current_block.y)
-					//clearInterval(interval);
-				//}, 300);
-			//})();
+					snakeGameBoardBuffer.putSegment(cb);
+					snakeGameDrawer.update();
+				}, b * 100);
+			})(cb, b);
 		};
+		
+		this.status = this.SNAKE_STATES.DEAD;
 	};
 };
 
@@ -251,10 +251,10 @@ var SnakeGame = function(canvas){
 	BLOCKS_X = BOARD_W / 20;
 	BLOCKS_Y = BOARD_H / 20;
 	
-	var snakeGameBoardBuffer = new SnakeGameBoardBuffer();
+	snakeGameBoardBuffer = new SnakeGameBoardBuffer();
 	var snake = new Snake(snakeGameBoardBuffer);
 	snake.updateBuffer();
-	var snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
+	snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
 	
 	snakeGameDrawer.update();
 	
@@ -277,6 +277,10 @@ var SnakeGame = function(canvas){
 	var ILLEGAL_MOVE = WSAD_CODES.RIGHT;
 	
 	var keyDownEvent = function(e){
+		
+		if(snake.status === snake.SNAKE_STATES.DEAD){
+			return;
+		}
 		
 		var MOVES = {};
 		MOVES[WSAD_CODES.UP] = [0, -SEGMENT_SIZE];
