@@ -28,9 +28,17 @@ Segment.SEGMENT_TYPES = {
 		id: 3,
 		color: null,
 	},
+	
+	DEAD_SNAKE: {
+		id: 4,
+		color: "#A8969D",
+	},
 };
 
 var Snake = function(snakeGameBoardBuffer){
+	
+	
+	var snake = this;
 	
 	this.body = [];
 	
@@ -68,6 +76,7 @@ var Snake = function(snakeGameBoardBuffer){
 					
 				case Segment.SEGMENT_TYPES.SNAKE.id:
 					//alert("kolizja!");
+					snake.die();
 					return snakeGameCollisionDetector.COLLISION_STATES.SNAKE;
 					break;
 		
@@ -131,11 +140,18 @@ var Snake = function(snakeGameBoardBuffer){
 			this.teleport(new_head_segment);
 		}
 		
-		// cut off snake's tail or eat new segment
-		if(snakeGameCollisionDetector.processMove(new_head_segment) !== snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
-			snakeGameBoardBuffer.deleteSegment(this.body.pop());
+		var move_result = snakeGameCollisionDetector.processMove(new_head_segment);
+		
+		if(move_result === snakeGameCollisionDetector.COLLISION_STATES.SNAKE){
+			this.die();
+			return;
 		}
 		
+		// cut off snake's tail or eat new segment
+		if(move_result !== snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
+			snakeGameBoardBuffer.deleteSegment(this.body.pop());
+		}
+
 		var new_body = [new_head_segment];
 		[].push.apply(new_body, this.body);
 		this.body = new_body;
@@ -144,7 +160,22 @@ var Snake = function(snakeGameBoardBuffer){
 	};
 	
 	this.die = function(){
-		
+		for(var b in this.body){
+			
+			var current_block = this.body[b];
+			
+			//(function(){
+				//var interval = setInterval(function(){
+			
+					current_block.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
+					current_block.color = Segment.SEGMENT_TYPES.DEAD_SNAKE.color;
+					snakeGameBoardBuffer.putSegment(current_block);
+					
+					console.info(current_block.x + ", " + current_block.y)
+					//clearInterval(interval);
+				//}, 300);
+			//})();
+		};
 	};
 };
 
