@@ -9,7 +9,12 @@
 	</head>
 	<body>
 		<canvas id="can" width="700" height="700"></canvas>
-		<script type="text/javascript" src="snake.js">
+		<script type="text/javascript" src="snake.js"></script>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function () {
+				var canvas = document.getElementById("can");
+				SnakeGame(canvas);
+			});
 		</script>
 	</body>
 </html>

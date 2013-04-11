@@ -169,7 +169,7 @@ var Snake = function(snakeGameBoardBuffer){
 					cb.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
 					cb.color = dead_colors[b] || dead_colors[dead_colors.length - 1];
 					
-					snakeGameBoardBuffer.putSegment(cb);
+					snakeGameBoardBuffer.putSegment(cb); //TODO remove global!
 					snakeGameDrawer.update();
 				}, b * 100);
 			})(cb, b);
@@ -256,8 +256,6 @@ var SnakeGame = function(canvas){
 	snake.updateBuffer();
 	snakeGameDrawer = new SnakeGameDrawer(canvas, snakeGameBoardBuffer);
 	
-	snakeGameDrawer.update();
-	
 	var WSAD_CODES = {
 		UP: 87,
 		DOWN: 83,
@@ -265,14 +263,17 @@ var SnakeGame = function(canvas){
 		RIGHT: 68,
 	};
 	
-	snakeGameBoardBuffer.putSegment(new Segment(0, 0, Segment.SEGMENT_TYPES.RED_BLOCK));
-	putRandomBlock = function(){
+	putRandomBlock = function(){ //TODO remove global!
 		var x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		var y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
 		
 		snakeGameBoardBuffer.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
 	};
-	putRandomBlock();putRandomBlock();putRandomBlock();
+	
+	putRandomBlock();
+	putRandomBlock();
+	putRandomBlock();
+	snakeGameDrawer.update();
 	
 	var ILLEGAL_MOVE = WSAD_CODES.RIGHT;
 	
@@ -307,8 +308,3 @@ var SnakeGame = function(canvas){
 	
 	document.onkeydown = keyDownEvent;
 };
-
-document.addEventListener('DOMContentLoaded', function () {
-	var canvas = document.getElementById("can");
-	SnakeGame(canvas);
-});
