@@ -1,0 +1,21 @@
+<!-- revision #17 -->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<style>
+			canvas{
+				border: 1px solid #000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="can" width="700" height="700"></canvas>
+		<script type="text/javascript" src="snake.js"></script>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function () {
+				var canvas = document.getElementById("can");
+				SnakeGame(canvas);
+			});
+		</script>
+	</body>
+</html>
