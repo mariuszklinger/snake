@@ -1,3 +1,5 @@
+
+
 var SEGMENT_SIZE = 20;
 var BOARD_W, BOARD_H;
 var BLOCKS_X, BLOCKS_Y;
@@ -264,8 +266,12 @@ var SnakeGame = function(canvas){
 	};
 	
 	putRandomBlock = function(){ //TODO remove global!
-		var x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
-		var y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
+		var x, y;
+		do{
+			x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
+			y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
+		}
+		while(snakeGameBoardBuffer.getSegment(x / SEGMENT_SIZE, y / SEGMENT_SIZE).type !==  Segment.SEGMENT_TYPES.BLANK);
 		
 		snakeGameBoardBuffer.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
 	};
