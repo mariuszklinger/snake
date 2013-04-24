@@ -1,5 +1,3 @@
-
-
 var SEGMENT_SIZE = 20;
 var BOARD_W, BOARD_H;
 var BLOCKS_X, BLOCKS_Y;
@@ -39,16 +37,14 @@ Segment.SEGMENT_TYPES = {
 
 var Snake = function(snakeGameBoardBuffer){
 	
-	var snake = this;
-	
 	this.body = [];
 	
 	this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
-	this.body.push(new Segment(300 + 1 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
-	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
-	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
-	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
-	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+//	this.body.push(new Segment(300 + 1 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+//	this.body.push(new Segment(300 + 2 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+//	this.body.push(new Segment(300 + 3 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+//	this.body.push(new Segment(300 + 4 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
+//	this.body.push(new Segment(300 + 5 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE));
 	
 	this.SNAKE_STATES = {
 		LIVE: 1,
@@ -57,39 +53,7 @@ var Snake = function(snakeGameBoardBuffer){
 	
 	this.status = this.SNAKE_STATES.LIVE;
 	
-	var snakeGameCollisionDetector = (function(_snakeGameBoardBuffer){
-		var snakeGameBoardBuffer = _snakeGameBoardBuffer;
-		
-		this.COLLISION_STATES = {
-			SNAKE: 1,
-			EATABLE_BLOCK: 2,
-		};
-		
-		this.processMove = function(head){
 
-			var block = snakeGameBoardBuffer.getSegment(head.x / SEGMENT_SIZE, head.y / SEGMENT_SIZE);
-			
-			switch (block.type.id) {
-				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					putRandomBlock();
-					return snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK;
-					break;
-					
-				case Segment.SEGMENT_TYPES.SNAKE.id:
-					snake.die();
-					return snakeGameCollisionDetector.COLLISION_STATES.SNAKE;
-					break;
-		
-				case Segment.SEGMENT_TYPES.BLANK.id:
-					return false;
-					break;
-				default:
-					break;
-			}
-		};
-		
-		return this;
-	})(snakeGameBoardBuffer);
 	
 	this.getTail = function(){
 		return this.body[this.body.length - 1];
@@ -140,15 +104,15 @@ var Snake = function(snakeGameBoardBuffer){
 			this.teleport(new_head_segment);
 		}
 		
-		var move_result = snakeGameCollisionDetector.processMove(new_head_segment);
+		var move_result = snakeGameBoardBuffer.snakeGameCollisionDetector.processMove(new_head_segment);
 		
-		if(move_result === snakeGameCollisionDetector.COLLISION_STATES.SNAKE){
+		if(move_result === snakeGameBoardBuffer.snakeGameCollisionDetector.COLLISION_STATES.SNAKE){
 			this.die();
 			return;
 		}
 		
 		// cut off snake's tail or eat new segment
-		if(move_result !== snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
+		if(move_result !== snakeGameBoardBuffer.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
 			snakeGameBoardBuffer.deleteSegment(this.body.pop());
 		}
 
@@ -213,6 +177,39 @@ var SnakeGameBoardBuffer = function(){
 	this.getSegment = function(x, y){
 		return board[y][x];
 	};
+	
+	this.snakeGameCollisionDetector = (function(_snakeGameBoardBuffer){
+		var snakeGameBoardBuffer = _snakeGameBoardBuffer;
+		
+		this.COLLISION_STATES = {
+			SNAKE: 1,
+			EATABLE_BLOCK: 2,
+		};
+		
+		this.processMove = function(head){
+
+			var block = snakeGameBoardBuffer.getSegment(head.x / SEGMENT_SIZE, head.y / SEGMENT_SIZE);
+			
+			switch (block.type.id) {
+				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
+					putRandomBlock();
+					return COLLISION_STATES.EATABLE_BLOCK;
+					break;
+					
+				case Segment.SEGMENT_TYPES.SNAKE.id:
+					return COLLISION_STATES.SNAKE;
+					break;
+		
+				case Segment.SEGMENT_TYPES.BLANK.id:
+					return false;
+					break;
+				default:
+					break;
+			}
+		};
+		
+		return this;
+	})(this);
 	
 };
 
