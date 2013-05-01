@@ -1,13 +1,12 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+var SnakeGameCore = require("../shared/SnakeGameCore.js");
+
 
 var server = http.createServer(function(request, response) {
-    // process HTTP request. Since we're writing just WebSockets server
-    // we don't have to implement anything.
 });
 server.listen(1337, function() { });
 
-// create the server
 wsServer = new WebSocketServer({
     httpServer: server
 });
@@ -17,6 +16,12 @@ var i = 0;
 wsServer.on('request', function(request) {
 	
     var connection = request.accept(null, request.origin);
+    
+    connection.send(JSON.stringify({
+    	x: 555,
+    	y: "asdasddas",
+    	
+    }));
 
     console.log("CONNECTION ON");
     connection.on('message', function(message) {

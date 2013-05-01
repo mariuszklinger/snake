@@ -5,7 +5,7 @@ var BOARD_H = 700;
 var BLOCKS_X = BOARD_W / SEGMENT_SIZE;
 var BLOCKS_Y = BOARD_H / SEGMENT_SIZE;
 
-function Segment(x, y, type, snake){
+var Segment = function (x, y, type, snake){
 	this.x = x;
 	this.y = y;
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
@@ -39,7 +39,7 @@ Segment.SEGMENT_TYPES = {
 	},
 };
 
-var Snake = function(snakeGameBoardBuffer){
+var Snake = function(){
 	
 	this.body = [];
 	
@@ -51,25 +51,25 @@ var Snake = function(snakeGameBoardBuffer){
 	};
 	
 	this.status = this.SNAKE_STATES.LIVE;
+};
+
+Snake.prototype.getTail = function(){
+	return this.body[this.body.length - 1];
+};
+
+Snake.prototype.getHead = function(){
+	return this.body[0];
+};
+
+Snake.prototype.move = function(move){
+	var current_head = this.getHead();
+	var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1], Segment.SEGMENT_TYPES.SNAKE);
 	
-	this.getTail = function(){
-		return this.body[this.body.length - 1];
-	};
-	
-	this.getHead = function(){
-		return this.body[0];
-	};
-	
-	this.move = function(move){
-		var current_head = this.getHead();
-		var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1], Segment.SEGMENT_TYPES.SNAKE);
-		
-		return snakeGameBoardBuffer.moveSnake(this, new_head_segment);
-	};
-	
-	this.die = function(){
-		this.status = this.SNAKE_STATES.DEAD;
-	};
+	return SnakeGameBoard.moveSnake(this, new_head_segment);
+};
+
+Snake.prototype.die = function(){
+	this.status = this.SNAKE_STATES.DEAD;
 };
 
 var SnakeGameBoard = {
@@ -202,3 +202,16 @@ var SnakeGameBoard = {
 	})(this),
 	
 };
+
+if(typeof exports !== "undefined"){
+	exports.SEGMENT_SIZE = SEGMENT_SIZE;
+	exports.BOARD_W = BOARD_W;
+	exports.BOARD_H = BOARD_H;
+
+	exports.BLOCKS_X = BLOCKS_X;
+	exports.BLOCKS_Y = BLOCKS_Y;
+	
+	exports.Snake = Snake;
+	exports.Segment = Segment;
+	exports.SnakeGameBoard = SnakeGameBoard;
+}

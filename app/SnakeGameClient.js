@@ -1,4 +1,4 @@
-putRandomBlock = function(){ //TODO remove global!
+var putRandomBlock = function(){ //TODO remove global!
 	var x, y;
 	do{
 		x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
@@ -14,6 +14,7 @@ var SnakeGame = {
 	init: function(canvas){
 		SnakeGame.snake = new Snake(SnakeGameBoard);
 		SnakeGameBoard.updateBuffer(SnakeGame.snake);
+		SnakeGame.SnakeGameClient.init();
 		
 		putRandomBlock();
 		putRandomBlock();
@@ -24,9 +25,51 @@ var SnakeGame = {
 		
 		document.onkeydown = this.keyDownEvent;
 		
+		SnakeGame.MOVES[SnakeGame.WSAD_CODES.UP] = [0, -SEGMENT_SIZE];
+		SnakeGame.MOVES[SnakeGame.WSAD_CODES.DOWN] = [0, SEGMENT_SIZE];
+		SnakeGame.MOVES[SnakeGame.WSAD_CODES.RIGHT] = [SEGMENT_SIZE, 0];
+		SnakeGame.MOVES[SnakeGame.WSAD_CODES.LEFT] = [-SEGMENT_SIZE, 0];
+	
+		SnakeGame.OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.UP] = SnakeGame.WSAD_CODES.DOWN;
+		SnakeGame.OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.DOWN] = SnakeGame.WSAD_CODES.UP;
+		SnakeGame.OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.LEFT] = SnakeGame.WSAD_CODES.RIGHT;
+		SnakeGame.OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.RIGHT] = SnakeGame.WSAD_CODES.LEFT;
 	},	
 		
 	snake: new Snake(SnakeGameBoard),
+	
+	SnakeGameClient: {
+			
+		init: function(){
+			var wsUri = "ws://localhost:1337/";
+
+			websocket = new WebSocket(wsUri);
+			
+			var i = 0;
+			websocket.onopen = function(evt) {
+				SnakeGameClient.getBoard(evt);
+			};
+			websocket.onclose = function(evt) {
+				//onClose(evt)
+			};
+			websocket.onmessage = function(evt) {
+				//onMessage(evt)
+				console.log(evt.data);
+			};
+			websocket.onerror = function(evt) {
+				//onError(evt)
+			};
+			
+		},
+			
+		getBoard: function(evt){
+			console.info(evt.data.y)
+		},
+		
+		sendMove: function(move){
+			
+		},	
+	},
 	
 	SnakeGameDrawer: {
 		
@@ -89,31 +132,23 @@ var SnakeGame = {
 	
 	ILLEGAL_MOVE: undefined,
 	
+	MOVES: {},
+	
+	// map used to block "turn back" snake
+	OPPOSITE_MOVE_MAP: {},
+	
 	keyDownEvent: function(e){
 		
 		if(SnakeGame.snake.status === SnakeGame.snake.SNAKE_STATES.DEAD){
 			return;
 		}
-		
-		var MOVES = {};
-		MOVES[SnakeGame.WSAD_CODES.UP] = [0, -SEGMENT_SIZE];
-		MOVES[SnakeGame.WSAD_CODES.DOWN] = [0, SEGMENT_SIZE];
-		MOVES[SnakeGame.WSAD_CODES.RIGHT] = [SEGMENT_SIZE, 0];
-		MOVES[SnakeGame.WSAD_CODES.LEFT] = [-SEGMENT_SIZE, 0];
-		
-		// map used to block "turn back" snake
-		var OPPOSITE_MOVE_MAP = {};
-		OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.UP] = SnakeGame.WSAD_CODES.DOWN;
-		OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.DOWN] = SnakeGame.WSAD_CODES.UP;
-		OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.LEFT] = SnakeGame.WSAD_CODES.RIGHT;
-		OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.RIGHT] = SnakeGame.WSAD_CODES.LEFT;
 
-		var current_move = MOVES[e.keyCode];
+		var current_move = SnakeGame.MOVES[e.keyCode];
 		if(!current_move || (e.keyCode === SnakeGame.ILLEGAL_MOVE)){
 			return;
 		}
 		
-		SnakeGame.ILLEGAL_MOVE = OPPOSITE_MOVE_MAP[e.keyCode];
+		SnakeGame.ILLEGAL_MOVE = SnakeGame.OPPOSITE_MOVE_MAP[e.keyCode];
 		
 		if(!SnakeGame.snake.move(current_move)){
 			SnakeGame.SnakeGameDrawer.die(SnakeGame.snake);
