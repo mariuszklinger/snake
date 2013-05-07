@@ -5,16 +5,21 @@ var BOARD_H = 700;
 var BLOCKS_X = BOARD_W / SEGMENT_SIZE;
 var BLOCKS_Y = BOARD_H / SEGMENT_SIZE;
 
-var Segment = function (x, y, type, snake){
+var Segment = function (x, y, type, snakeID){
+	
+	// pixels...
 	this.x = x;
 	this.y = y;
+	
+	// segment's number TODO: use it
+	this.nx = x / SEGMENT_SIZE;
+	this.ny = y / SEGMENT_SIZE;
+	
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
 	this.color = undefined;
-	this.snake = snake;
+	this.snakeID = snakeID;
 	
-	this.getColor = function(){
-		return this.type.color;
-	};
+
 };
 
 Segment.SEGMENT_TYPES = {
@@ -30,7 +35,7 @@ Segment.SEGMENT_TYPES = {
 	
 	SNAKE: {
 		id: 3,
-		color: null,
+		color: "#AA2344",
 	},
 	
 	DEAD_SNAKE: {
@@ -39,11 +44,32 @@ Segment.SEGMENT_TYPES = {
 	},
 };
 
-var Snake = function(){
+Segment.prototype.getColor = function(){
+	return this.type.color;
+};
+
+Segment.prototype.getKeyByValue = function(v){
+	
+};
+
+var SnakeMessage = function(_type, _msg){
+	this.type = _type;
+	this.msg = _msg;
+};
+
+SnakeMessage.TYPES = {
+	INIT: {
+		id: 1,
+	},
+};
+
+var Snake = function(head){
 	
 	this.body = [];
+	this.snakeID = head.snakeID;
 	
-	this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE, this));
+	//this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE, this));
+	this.body.push(head);
 	
 	this.SNAKE_STATES = {
 		LIVE: 1,
@@ -213,5 +239,6 @@ if(typeof exports !== "undefined"){
 	
 	exports.Snake = Snake;
 	exports.Segment = Segment;
+	exports.SnakeMessage = SnakeMessage;
 	exports.SnakeGameBoard = SnakeGameBoard;
 }

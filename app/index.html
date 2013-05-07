@@ -1,4 +1,4 @@
-<!-- revision #20 -->
+<!-- revision #22 -->
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -12,8 +12,9 @@
 		<canvas id="can" width="700" height="700"></canvas>
 		<script type="text/javascript" src="../shared/SnakeGameCore.js"></script>
 		<script type="text/javascript" src="SnakeGameClient.js"></script>
-		<script type="text/javascript" src="snake_client.js"></script>
 		<script type="text/javascript">
+			window.WebSocket = window.WebSocket || window.MozWebSocket;
+		
 			document.addEventListener('DOMContentLoaded', function () {
 				var canvas = document.getElementById("can");
 				SnakeGame.init(canvas);

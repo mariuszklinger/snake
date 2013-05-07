@@ -1,4 +1,4 @@
-var putRandomBlock = function(){ //TODO remove global!
+var putRandomBlock = function(){
 	var x, y;
 	do{
 		x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
@@ -12,8 +12,6 @@ var putRandomBlock = function(){ //TODO remove global!
 var SnakeGame = {
 
 	init: function(canvas){
-		SnakeGame.snake = new Snake(SnakeGameBoard);
-		SnakeGameBoard.updateBuffer(SnakeGame.snake);
 		SnakeGame.SnakeGameClient.init();
 		
 		putRandomBlock();
@@ -36,7 +34,7 @@ var SnakeGame = {
 		SnakeGame.OPPOSITE_MOVE_MAP[SnakeGame.WSAD_CODES.RIGHT] = SnakeGame.WSAD_CODES.LEFT;
 	},	
 		
-	snake: new Snake(SnakeGameBoard),
+	snake: null,
 	
 	SnakeGameClient: {
 			
@@ -45,25 +43,37 @@ var SnakeGame = {
 
 			websocket = new WebSocket(wsUri);
 			
-			var i = 0;
 			websocket.onopen = function(evt) {
-				SnakeGameClient.getBoard(evt);
 			};
+			
 			websocket.onclose = function(evt) {
-				//onClose(evt)
 			};
 			websocket.onmessage = function(evt) {
-				//onMessage(evt)
-				console.log(evt.data);
+				SnakeGame.SnakeGameClient.dispatchMsg(JSON.parse(evt.data));
 			};
 			websocket.onerror = function(evt) {
-				//onError(evt)
 			};
 			
 		},
+		
+		dispatchMsg: function(obj){
+			switch (obj.type.id) {
+			case SnakeMessage.TYPES.INIT.id:
+				console.info(obj.msg);
+				
+				SnakeGame.snake = new Snake(obj.msg.head);
+				//SnakeGameBoard.board = obj.msg.board;
+				SnakeGameBoard.updateBuffer(SnakeGame.snake);
+				SnakeGame.SnakeGameDrawer.initDraw();	
+				break;
+
+			default:
+				break;
+			}
+		},
 			
 		getBoard: function(evt){
-			console.info(evt.data.y)
+			
 		},
 		
 		sendMove: function(move){
@@ -79,6 +89,20 @@ var SnakeGame = {
 		init: function(canvas){
 			this.canvas = canvas;
 			this.context = canvas.getContext("2d");
+			this.initDraw();
+		},
+		
+		//  draws every segment
+		initDraw: function(){
+			var that = this;var i = 0;
+			SnakeGameBoard.board.forEach(function(row){
+				row.forEach(function(s){
+					that.drawSegment(s);
+					i++
+				});
+			});
+			
+			console.log("init draw = " + i)
 		},
 		
 		drawSegment: function(s){
