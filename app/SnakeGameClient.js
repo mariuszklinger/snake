@@ -14,10 +14,6 @@ var SnakeGame = {
 	init: function(canvas){
 		SnakeGame.SnakeGameClient.init();
 		
-		putRandomBlock();
-		putRandomBlock();
-		putRandomBlock();
-		
 		this.SnakeGameDrawer.init(canvas);
 		this.SnakeGameDrawer.update();
 		
@@ -62,18 +58,23 @@ var SnakeGame = {
 				console.info(obj.msg);
 				
 				SnakeGame.snake = new Snake(obj.msg.head);
-				//SnakeGameBoard.board = obj.msg.board;
+				this.updateBoard(obj.msg.board);
 				SnakeGameBoard.updateBuffer(SnakeGame.snake);
+				
 				SnakeGame.SnakeGameDrawer.initDraw();	
 				break;
 
 			default:
+				console.info(obj);
 				break;
 			}
 		},
 			
-		getBoard: function(evt){
-			
+		updateBoard: function(segments_array){
+			segments_array.forEach(function(s){
+				var segment = new Segment(s.x, s.y, Segment.getTypeByValue(s.typeV), s.snakeID);
+				SnakeGameBoard.putSegment(segment);
+			});
 		},
 		
 		sendMove: function(move){
@@ -94,15 +95,15 @@ var SnakeGame = {
 		
 		//  draws every segment
 		initDraw: function(){
-			var that = this;var i = 0;
+			var that = this;
 			SnakeGameBoard.board.forEach(function(row){
 				row.forEach(function(s){
+					if(s.type.id == 2){
+						console.info(s);
+					}
 					that.drawSegment(s);
-					i++
 				});
 			});
-			
-			console.log("init draw = " + i)
 		},
 		
 		drawSegment: function(s){

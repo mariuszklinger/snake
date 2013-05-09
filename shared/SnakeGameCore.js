@@ -18,7 +18,6 @@ var Segment = function (x, y, type, snakeID){
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
 	this.color = undefined;
 	this.snakeID = snakeID;
-	
 
 };
 
@@ -48,8 +47,17 @@ Segment.prototype.getColor = function(){
 	return this.type.color;
 };
 
-Segment.prototype.getKeyByValue = function(v){
+Segment.getTypeByValue = function(v){
+
+	var key = null;
 	
+	Object.keys(Segment.SEGMENT_TYPES).filter(function(k){
+		if(!key && Segment.SEGMENT_TYPES[k].id === v){
+			key = k;
+		}
+	});
+	
+	return Segment.SEGMENT_TYPES[key];
 };
 
 var SnakeMessage = function(_type, _msg){

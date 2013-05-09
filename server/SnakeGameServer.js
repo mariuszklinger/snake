@@ -26,6 +26,8 @@ var SnakeGameServer = {
 		wsServer = new WebSocketServer({
 		    httpServer: server,
 		});
+		
+		SnakeGameServer.putRedBlock();
 
 		wsServer.on("request", function(request) {
 			
@@ -33,52 +35,63 @@ var SnakeGameServer = {
 
 		    console.log("==== CONNECTION ON");
 		    
-		    connection.send(JSON.stringify(SnakeGameServer.spawnNewSnake()));
+
+		    var SNAKE_ID = SnakeGameServer.clients.length;
+		    
+		    var msg = SnakeGameServer.initMessage();
+		    connection.send(JSON.stringify(msg));
 		    
 		    connection.on("message", function(message) {
 
 		    });
 
 		    connection.on("close", function(connection) {
+		    	SnakeGameServer.removeSnake(SNAKE_ID);
 		    	console.log("===== CLOOOOSEEE");
 		    });
 		});
 	},
 	
-	spawnNewSnake: function(){
+	initMessage: function(SNAKE_ID){
 		
-		var getNewSnakeID = function(){
-			return SnakeGameServer.clients.length;
-		};
-		
-		console.info("\t+snake id = " + getNewSnakeID());
-		
-		SnakeGameServer.snake_board.board[3][3].color = "red";
-		
-		var new_snake_head = SnakeGameServer.putBlock(new Segment(null, null, Segment.SEGMENT_TYPES.SNAKE, getNewSnakeID()));
 		var msg_content = {
-			head: new_snake_head,
-			board: SnakeGameServer.snake_board.board,
+			head: SnakeGameServer.spawnNewSnake(SNAKE_ID),
+			board: SnakeGameServer.getNonBlankSegments(),
 		};
 		
-		SnakeGameServer.clients.push(new Snake(new_snake_head));
+		SnakeGameServer.clients.push(msg_content.head);
 		
 		return new SnakeMessage(SnakeMessage.TYPES.INIT, msg_content);
 	},
 	
-	compressBoard: function(){
+	spawnNewSnake: function(SNAKE_ID){
+		
+		var new_snake_head = SnakeGameServer.putBlock(new Segment(null, null, Segment.SEGMENT_TYPES.SNAKE, SNAKE_ID));
+		console.info("\t+snake id = " + SNAKE_ID);
+		
+		SnakeGameServer.clients.push(new Snake(new_snake_head));
+		
+		return new_snake_head;
+	},
+	
+	// convert segment object to object easy to send and receive
+	serializeSegment: function(segment){
+		return {
+			x: segment.x,
+			y: segment.y,
+			typeV: segment.type.id,
+			snakeID: segment.snakeID,
+			color: segment.color,
+		};
+	},
+	
+	getNonBlankSegments: function(){
 		var not_blank = [];
 		
-		snake_board.board.forEach(function(row){
+		this.snake_board.board.forEach(function(row){
 			row.forEach(function(segment){
 				if(segment.type.id !== Segment.SEGMENT_TYPES.BLANK.id){
-					not_blank.push({
-						x: segment.x,
-						y: segment.y,
-						typeV: segment.type,
-						snakeID: segment.snakeID,
-						color: segment.color,
-					});
+					not_blank.push(SnakeGameServer.serializeSegment(segment));
 				}
 			});
 		});
@@ -86,10 +99,20 @@ var SnakeGameServer = {
 		return not_blank;
 	},
 	
+	removeSnake: function(snakeID){
+		
+		var snake = this.clients[snakeID];
+		
+		snake.body.forEach(function(s){
+			s.type = Segment.SEGMENT_TYPES.BLANK;
+		});
+	},
+	
 	putRedBlock: function(){
 		SnakeGameServer.putBlock(new Segment(null, null, Segment.SEGMENT_TYPES.RED_BLOCK, null));
 	},
 	
+	// draw random position for segment
 	putBlock: function(segment){
 		var x, y;
 		do{
