@@ -1,4 +1,4 @@
-var SEGMENT_SIZE = 20;
+var SEGMENT_SIZE = 50;
 var BOARD_W = 700;
 var BOARD_H = 700;
 
@@ -18,7 +18,6 @@ var Segment = function (x, y, type, snakeID){
 	this.type = type || Segment.SEGMENT_TYPES.BLANK;
 	this.color = undefined;
 	this.snakeID = snakeID;
-
 };
 
 Segment.SEGMENT_TYPES = {
@@ -80,17 +79,20 @@ SnakeMessage.TYPES = {
 	NEW_SNAKE: {
 		id: 3,
 	},
+	
+	// message sends when client disconnect
+	REMOVE_SNAKE: {
+		id: 4,
+	},
 };
 
-var Snake = function(head){
+var Snake = function(body){ //TODO snake could be instantined as a body array
 	
-	this.body = [];
-	this.snakeID = head.snakeID;
-	
-	console.warn("HELLO, snakeID = " + this.snakeID);
+	this.body = body;
+	this.snakeID = body[0].snakeID;
 	
 	//this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE, this));
-	this.body.push(head);
+	//this.body.push(head);
 	
 	this.SNAKE_STATES = {
 		LIVE: 1,
@@ -142,6 +144,12 @@ var SnakeGameBoard = {
 		to_erase.color = Segment.SEGMENT_TYPES.BLANK.color;
 		
 		this.to_update.push(to_erase);
+	},
+	
+	deleteSnake: function(snake){
+		snake.body.forEach(function(segment){
+			SnakeGameBoard.deleteSegment(segment);
+		});
 	},
 	
 	putSegment: function(s){

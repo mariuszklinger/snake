@@ -20,6 +20,7 @@ var SnakeGame = {
 	},	
 		
 	snake: null,
+	clients: [],
 	
 	SnakeGameClient: {
 		
@@ -49,17 +50,48 @@ var SnakeGame = {
 			switch (obj.type.id) {
 				case SnakeMessage.TYPES.INIT.id:
 					
-					SnakeGame.snake = new Snake(obj.msg.head);
-					this.updateBoard(obj.msg.board);
+					SnakeGame.snake = new Snake([obj.msg.head]);
+					console.warn(" - INIT - HELLO, snakeID = " + SnakeGame.snake.snakeID);
+					console.warn(obj.msg);
+					SnakeGame.SnakeGameClient.updateBoard(obj.msg.board);
+					obj.msg.clients.forEach(function(s){
+						 SnakeGame.clients[s.snakeID] = new Snake(s.body);
+					});
+					
 					SnakeGameBoard.updateBuffer(SnakeGame.snake);
 					
 					SnakeGame.SnakeGameDrawer.initDraw();	
 					break;
 					
 				case SnakeMessage.TYPES.MOVE.id:
-					// TODO cza rejestr wszystkich snakow zrobic... w init messageu tez je przeslac... ZOMG
+					
+					console.log("MOVE")
+					console.log(obj.msg)
+					SnakeGame.clients[obj.msg.snakeID].move(obj.msg.move);
+					SnakeGame.SnakeGameDrawer.update();
 					break;
 	
+				case SnakeMessage.TYPES.NEW_SNAKE.id:
+					console.info("NEW SNAKE SWITCH:");
+					console.info(obj);
+					var new_snake = new Snake(obj.msg.snake.body);
+					SnakeGame.clients[obj.msg.snake.snakeID] = new_snake;
+					SnakeGameBoard.updateBuffer(new_snake);
+					SnakeGame.SnakeGameDrawer.update();
+					break;
+				
+				case SnakeMessage.TYPES.REMOVE_SNAKE.id:
+					console.info("REMOVE SNAKE SWITCH:");
+					console.info(obj);
+					
+					var to_remove_snakeID = obj.msg.snakeID;
+					var snake = SnakeGame.clients[to_remove_snakeID];
+					
+					SnakeGameBoard.deleteSnake(snake);
+					SnakeGame.clients[to_remove_snakeID] = undefined;
+					SnakeGame.SnakeGameDrawer.update();
+					break;
+					
 				default:
 					console.info("DEFAULT SWITCH:");
 					console.info(obj);

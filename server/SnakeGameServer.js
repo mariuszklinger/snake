@@ -56,6 +56,13 @@ var SnakeGameServer = {
 
 		    connection.on("close", function(connection) {
 		    	SnakeGameServer.removeSnake(SNAKE_ID);
+		    	
+			    // notice others clients about new snake 
+			    SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.REMOVE_SNAKE, {
+			    	snakeID: SNAKE_ID,
+			    }), SNAKE_ID);
+			    
+		    	
 		    	console.log("===== CLOOOOSEEE");
 		    });
 		});
@@ -66,6 +73,7 @@ var SnakeGameServer = {
 		var msg_content = {
 			head: SnakeGameServer.clients[SNAKE_ID].getHead(),
 			board: SnakeGameServer.getNonBlankSegments(),
+			clients: SnakeGameServer.clients,
 		};
 		
 		return new SnakeMessage(SnakeMessage.TYPES.INIT, msg_content);
@@ -76,7 +84,7 @@ var SnakeGameServer = {
 		var new_snake_head = SnakeGameServer.putBlock(new Segment(null, null, Segment.SEGMENT_TYPES.SNAKE, SNAKE_ID));
 		console.info("\t+snake id = " + SNAKE_ID);
 		
-		SnakeGameServer.clients[SNAKE_ID] = new Snake(new_snake_head);
+		SnakeGameServer.clients[SNAKE_ID] = new Snake([new_snake_head]);
 		
 		return new_snake_head;
 	},
@@ -113,6 +121,8 @@ var SnakeGameServer = {
 		snake.body.forEach(function(s){
 			s.type = Segment.SEGMENT_TYPES.BLANK;
 		});
+		
+		snake = undefined;
 	},
 	
 	putRedBlock: function(){
@@ -160,6 +170,9 @@ var SnakeGameServer = {
 				case SnakeMessage.TYPES.MOVE.id:
 					var snake = SnakeGameServer.clients[snakeID];
 					snake.move(content.msg.move);
+					
+					content.msg.snakeID = snakeID;
+					
 					SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.MOVE, content.msg), snakeID);
 					break;
 				};
