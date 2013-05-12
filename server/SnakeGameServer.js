@@ -17,11 +17,12 @@ var SnakeGameServer = {
 
 	snake_board: SnakeGameCore.SnakeGameBoard,
 	clients: [],
+	connections: [],
 		
 	init: function(){
 		
-		var server = http.createServer(function(request, response) {});
-		server.listen(1337, function() {});
+		var server = http.createServer(function(request, response){});
+		server.listen(1337, function(){});
 
 		wsServer = new WebSocketServer({
 		    httpServer: server,
@@ -31,18 +32,26 @@ var SnakeGameServer = {
 
 		wsServer.on("request", function(request) {
 			
-		    var connection = request.accept(null, request.origin);
+			// current client's ID
+			var SNAKE_ID = SnakeGameServer.clients.length;
 
-		    console.log("==== CONNECTION ON");
-		    
+			// current connection
+			var connection = request.accept(null, request.origin);
+			SnakeGameServer.connections[SNAKE_ID] = connection;
 
-		    var SNAKE_ID = SnakeGameServer.clients.length;
+		    console.log("===== CONNECTION ON");
 		    
-		    var msg = SnakeGameServer.initMessage();
-		    connection.send(JSON.stringify(msg));
+		    // snake for connected client
+		    SnakeGameServer.spawnNewSnake(SNAKE_ID);
+		    connection.send(JSON.stringify(SnakeGameServer.initMessage(SNAKE_ID)));
+		    
+		    // notice others clients about new snake 
+		    SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.NEW_SNAKE, {
+		    	snake: SnakeGameServer.clients[SNAKE_ID],
+		    }), SNAKE_ID);
 		    
 		    connection.on("message", function(message) {
-
+		    	SnakeGameServer.parseMessage(message, SNAKE_ID);
 		    });
 
 		    connection.on("close", function(connection) {
@@ -55,11 +64,9 @@ var SnakeGameServer = {
 	initMessage: function(SNAKE_ID){
 		
 		var msg_content = {
-			head: SnakeGameServer.spawnNewSnake(SNAKE_ID),
+			head: SnakeGameServer.clients[SNAKE_ID].getHead(),
 			board: SnakeGameServer.getNonBlankSegments(),
 		};
-		
-		SnakeGameServer.clients.push(msg_content.head);
 		
 		return new SnakeMessage(SnakeMessage.TYPES.INIT, msg_content);
 	},
@@ -69,7 +76,7 @@ var SnakeGameServer = {
 		var new_snake_head = SnakeGameServer.putBlock(new Segment(null, null, Segment.SEGMENT_TYPES.SNAKE, SNAKE_ID));
 		console.info("\t+snake id = " + SNAKE_ID);
 		
-		SnakeGameServer.clients.push(new Snake(new_snake_head));
+		SnakeGameServer.clients[SNAKE_ID] = new Snake(new_snake_head);
 		
 		return new_snake_head;
 	},
@@ -127,6 +134,38 @@ var SnakeGameServer = {
 		SnakeGameServer.snake_board.putSegment(segment);
 		
 		return segment;
+	},
+	
+	// sending new messages to all clients except one with snakeID
+	broadcastMessage: function(msg, snakeID){
+
+		this.clients.forEach(function(c, i){
+			if(i === snakeID){
+				return;
+			}
+			
+			console.log("\t wysylam msg z: #" + snakeID + " do: #" + i);
+			SnakeGameServer.connections[i].send(JSON.stringify(msg));
+		});
+	},
+	
+	parseMessage: function(data, snakeID){
+		if(data.type === "utf8"){
+			var content = JSON.parse(data.utf8Data);
+			
+			console.log(content);
+			
+			switch(content.type.id){
+			
+				case SnakeMessage.TYPES.MOVE.id:
+					var snake = SnakeGameServer.clients[snakeID];
+					snake.move(content.msg.move);
+					SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.MOVE, content.msg), snakeID);
+					break;
+				};
+
+			console.log(content);
+		}
 	},
 };
 

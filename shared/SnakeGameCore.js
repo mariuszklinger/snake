@@ -1,4 +1,4 @@
-var SEGMENT_SIZE = 50;
+var SEGMENT_SIZE = 20;
 var BOARD_W = 700;
 var BOARD_H = 700;
 
@@ -66,8 +66,19 @@ var SnakeMessage = function(_type, _msg){
 };
 
 SnakeMessage.TYPES = {
+	// message contains current board
 	INIT: {
 		id: 1,
+	},
+	
+	// message contains new move of snake
+	MOVE: {
+		id: 2,
+	},
+	
+	// message sends on new clients connection
+	NEW_SNAKE: {
+		id: 3,
 	},
 };
 
@@ -75,6 +86,8 @@ var Snake = function(head){
 	
 	this.body = [];
 	this.snakeID = head.snakeID;
+	
+	console.warn("HELLO, snakeID = " + this.snakeID);
 	
 	//this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE, this));
 	this.body.push(head);
@@ -203,6 +216,17 @@ var SnakeGameBoard = {
 		return true;
 	},
 	
+	putRandomBlock: function(){
+		var x, y;
+		do{
+			x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
+			y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
+		}
+		while(SnakeGameBoard.getSegment(x / SEGMENT_SIZE, y / SEGMENT_SIZE).type !== Segment.SEGMENT_TYPES.BLANK);
+		
+		SnakeGameBoard.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
+	},
+	
 	snakeGameCollisionDetector: (function(_snakeGameBoardBuffer){
 		
 		this.COLLISION_STATES = {
@@ -216,7 +240,7 @@ var SnakeGameBoard = {
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					putRandomBlock();
+					SnakeGameBoard.putRandomBlock();
 					return COLLISION_STATES.EATABLE_BLOCK;
 					break;
 					

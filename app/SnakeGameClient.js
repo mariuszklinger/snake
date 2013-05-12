@@ -1,14 +1,3 @@
-var putRandomBlock = function(){
-	var x, y;
-	do{
-		x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
-		y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
-	}
-	while(SnakeGameBoard.getSegment(x / SEGMENT_SIZE, y / SEGMENT_SIZE).type !==  Segment.SEGMENT_TYPES.BLANK);
-	
-	SnakeGameBoard.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
-};
-
 var SnakeGame = {
 
 	init: function(canvas){
@@ -33,6 +22,8 @@ var SnakeGame = {
 	snake: null,
 	
 	SnakeGameClient: {
+		
+		websocket: null,
 			
 		init: function(){
 			var wsUri = "ws://localhost:1337/";
@@ -45,29 +36,35 @@ var SnakeGame = {
 			websocket.onclose = function(evt) {
 			};
 			websocket.onmessage = function(evt) {
+				SnakeGame.snake && console.info("snake #" + SnakeGame.snake.snakeID + " message:");
 				SnakeGame.SnakeGameClient.dispatchMsg(JSON.parse(evt.data));
 			};
 			websocket.onerror = function(evt) {
 			};
 			
+			this.websocket = websocket;
 		},
 		
 		dispatchMsg: function(obj){
 			switch (obj.type.id) {
-			case SnakeMessage.TYPES.INIT.id:
-				console.info(obj.msg);
-				
-				SnakeGame.snake = new Snake(obj.msg.head);
-				this.updateBoard(obj.msg.board);
-				SnakeGameBoard.updateBuffer(SnakeGame.snake);
-				
-				SnakeGame.SnakeGameDrawer.initDraw();	
-				break;
-
-			default:
-				console.info(obj);
-				break;
-			}
+				case SnakeMessage.TYPES.INIT.id:
+					
+					SnakeGame.snake = new Snake(obj.msg.head);
+					this.updateBoard(obj.msg.board);
+					SnakeGameBoard.updateBuffer(SnakeGame.snake);
+					
+					SnakeGame.SnakeGameDrawer.initDraw();	
+					break;
+					
+				case SnakeMessage.TYPES.MOVE.id:
+					// TODO cza rejestr wszystkich snakow zrobic... w init messageu tez je przeslac... ZOMG
+					break;
+	
+				default:
+					console.info("DEFAULT SWITCH:");
+					console.info(obj);
+					break;
+				}
 		},
 			
 		updateBoard: function(segments_array){
@@ -77,8 +74,13 @@ var SnakeGame = {
 			});
 		},
 		
-		sendMove: function(move){
+		sendMove: function(_move){
 			
+			var msg = new SnakeMessage(SnakeMessage.TYPES.MOVE, {
+				move: _move,
+			});
+			
+			this.websocket.send(JSON.stringify(msg));
 		},	
 	},
 	
@@ -93,7 +95,7 @@ var SnakeGame = {
 			this.initDraw();
 		},
 		
-		//  draws every segment
+		// draws every segment
 		initDraw: function(){
 			var that = this;
 			SnakeGameBoard.board.forEach(function(row){
@@ -173,12 +175,16 @@ var SnakeGame = {
 			return;
 		}
 		
+		// block turn back
 		SnakeGame.ILLEGAL_MOVE = SnakeGame.OPPOSITE_MOVE_MAP[e.keyCode];
+		
+		SnakeGame.SnakeGameClient.sendMove(current_move);
 		
 		if(!SnakeGame.snake.move(current_move)){
 			SnakeGame.SnakeGameDrawer.die(SnakeGame.snake);
 		}
 		else{
+			// if snake is still alive
 			SnakeGame.SnakeGameDrawer.update();			
 		}
 	},
