@@ -51,15 +51,15 @@ var SnakeGame = {
 				case SnakeMessage.TYPES.INIT.id:
 					
 					SnakeGame.snake = new Snake([obj.msg.head]);
-					console.warn(" - INIT - HELLO, snakeID = " + SnakeGame.snake.snakeID);
-					console.warn(obj.msg);
+					console.warn(" - INIT - HELLO, snakeID = " + SnakeGame.snake.snakeID)
+					console.warn(obj.msg)
 					SnakeGame.SnakeGameClient.updateBoard(obj.msg.board);
 					obj.msg.clients.forEach(function(s){
 						 SnakeGame.clients[s.snakeID] = new Snake(s.body);
 					});
 					
 					SnakeGameBoard.updateBuffer(SnakeGame.snake);
-					
+
 					SnakeGame.SnakeGameDrawer.initDraw();	
 					break;
 					
@@ -67,8 +67,15 @@ var SnakeGame = {
 					
 					console.log("MOVE")
 					console.log(obj.msg)
-					SnakeGame.clients[obj.msg.snakeID].move(obj.msg.move);
-					SnakeGame.SnakeGameDrawer.update();
+					var snake_to_move = SnakeGame.clients[obj.msg.snakeID];
+
+					if(!snake_to_move.move(obj.msg.move)){
+						SnakeGame.SnakeGameDrawer.die(snake_to_move);
+					}
+					else{
+						SnakeGame.SnakeGameDrawer.update();
+					}
+					
 					break;
 	
 				case SnakeMessage.TYPES.NEW_SNAKE.id:
@@ -89,6 +96,16 @@ var SnakeGame = {
 					
 					SnakeGameBoard.deleteSnake(snake);
 					SnakeGame.clients[to_remove_snakeID] = undefined;
+					SnakeGame.SnakeGameDrawer.update();
+					break;
+					
+				case SnakeMessage.TYPES.NEW_BLOCK.id:
+					console.info("NEW RED BLOCK SWITCH:");
+					console.info(obj);
+					
+					var s = new Segment(obj.msg.new_block.x, obj.msg.new_block.y, Segment.SEGMENT_TYPES.RED_BLOCK, null);
+					
+					SnakeGameBoard.putSegment(s);
 					SnakeGame.SnakeGameDrawer.update();
 					break;
 					
@@ -132,9 +149,6 @@ var SnakeGame = {
 			var that = this;
 			SnakeGameBoard.board.forEach(function(row){
 				row.forEach(function(s){
-					if(s.type.id == 2){
-						console.info(s);
-					}
 					that.drawSegment(s);
 				});
 			});
@@ -212,11 +226,12 @@ var SnakeGame = {
 		
 		SnakeGame.SnakeGameClient.sendMove(current_move);
 		
+		// if snake crashed
 		if(!SnakeGame.snake.move(current_move)){
 			SnakeGame.SnakeGameDrawer.die(SnakeGame.snake);
 		}
+		// if snake is still alive
 		else{
-			// if snake is still alive
 			SnakeGame.SnakeGameDrawer.update();			
 		}
 	},

@@ -29,6 +29,8 @@ var SnakeGameServer = {
 		});
 		
 		SnakeGameServer.putRedBlock();
+		
+		SnakeGameServer.proxyGameBoardMethod();
 
 		wsServer.on("request", function(request) {
 			
@@ -66,6 +68,18 @@ var SnakeGameServer = {
 		    	console.log("===== CLOOOOSEEE");
 		    });
 		});
+	},
+	
+	proxyGameBoardMethod: function(){
+		var f = SnakeGameServer.snake_board.putRandomBlock;
+		
+		SnakeGameServer.snake_board.putRandomBlock = function(){
+			var red_block = f();
+			
+			SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.NEW_BLOCK, {
+		    	new_block: red_block,
+		    }), -1);
+		};
 	},
 	
 	initMessage: function(SNAKE_ID){
@@ -154,7 +168,6 @@ var SnakeGameServer = {
 				return;
 			}
 			
-			console.log("\t wysylam msg z: #" + snakeID + " do: #" + i);
 			SnakeGameServer.connections[i].send(JSON.stringify(msg));
 		});
 	},
@@ -162,8 +175,6 @@ var SnakeGameServer = {
 	parseMessage: function(data, snakeID){
 		if(data.type === "utf8"){
 			var content = JSON.parse(data.utf8Data);
-			
-			console.log(content);
 			
 			switch(content.type.id){
 			
@@ -175,9 +186,7 @@ var SnakeGameServer = {
 					
 					SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.MOVE, content.msg), snakeID);
 					break;
-				};
-
-			console.log(content);
+			};
 		}
 	},
 };

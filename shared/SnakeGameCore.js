@@ -43,7 +43,7 @@ Segment.SEGMENT_TYPES = {
 };
 
 Segment.prototype.getColor = function(){
-	return this.type.color;
+	return this.color || this.type.color;
 };
 
 Segment.getTypeByValue = function(v){
@@ -84,16 +84,17 @@ SnakeMessage.TYPES = {
 	REMOVE_SNAKE: {
 		id: 4,
 	},
+	
+	NEW_BLOCK: {
+		id: 5,
+	}
 };
 
 var Snake = function(body){ //TODO snake could be instantined as a body array
 	
 	this.body = body;
 	this.snakeID = body[0].snakeID;
-	
-	//this.body.push(new Segment(300 + 0 * SEGMENT_SIZE, 200, Segment.SEGMENT_TYPES.SNAKE, this));
-	//this.body.push(head);
-	
+
 	this.SNAKE_STATES = {
 		LIVE: 1,
 		DEAD: 2,
@@ -207,7 +208,6 @@ var SnakeGameBoard = {
 		var move_result = SnakeGameBoard.snakeGameCollisionDetector.processMove(new_head_segment);
 		
 		if(move_result === SnakeGameBoard.snakeGameCollisionDetector.COLLISION_STATES.SNAKE){
-			snake.die();
 			return false;
 		}
 		
@@ -224,17 +224,6 @@ var SnakeGameBoard = {
 		return true;
 	},
 	
-	putRandomBlock: function(){
-		var x, y;
-		do{
-			x = Math.floor(((Math.random() * BOARD_W) / SEGMENT_SIZE)) * SEGMENT_SIZE;
-			y = Math.floor(((Math.random() * BOARD_H) / SEGMENT_SIZE)) * SEGMENT_SIZE;
-		}
-		while(SnakeGameBoard.getSegment(x / SEGMENT_SIZE, y / SEGMENT_SIZE).type !== Segment.SEGMENT_TYPES.BLANK);
-		
-		SnakeGameBoard.putSegment(new Segment(x, y, Segment.SEGMENT_TYPES.RED_BLOCK));
-	},
-	
 	snakeGameCollisionDetector: (function(_snakeGameBoardBuffer){
 		
 		this.COLLISION_STATES = {
@@ -248,7 +237,6 @@ var SnakeGameBoard = {
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					SnakeGameBoard.putRandomBlock();
 					return COLLISION_STATES.EATABLE_BLOCK;
 					break;
 					
