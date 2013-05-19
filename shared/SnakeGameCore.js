@@ -224,6 +224,10 @@ var SnakeGameBoard = {
 		return true;
 	},
 	
+	putRedBlock: function(){
+		
+	},
+	
 	snakeGameCollisionDetector: (function(_snakeGameBoardBuffer){
 		
 		this.COLLISION_STATES = {
@@ -237,6 +241,7 @@ var SnakeGameBoard = {
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
+					SnakeGameBoard.putRedBlock();
 					return COLLISION_STATES.EATABLE_BLOCK;
 					break;
 					

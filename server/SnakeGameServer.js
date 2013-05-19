@@ -29,6 +29,9 @@ var SnakeGameServer = {
 		});
 		
 		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
 		
 		SnakeGameServer.proxyGameBoardMethod();
 
@@ -58,6 +61,7 @@ var SnakeGameServer = {
 
 		    connection.on("close", function(connection) {
 		    	SnakeGameServer.removeSnake(SNAKE_ID);
+		    	SnakeGameServer.connections[SNAKE_ID] = null;
 		    	
 			    // notice others clients about new snake 
 			    SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.REMOVE_SNAKE, {
@@ -71,15 +75,7 @@ var SnakeGameServer = {
 	},
 	
 	proxyGameBoardMethod: function(){
-		var f = SnakeGameServer.snake_board.putRandomBlock;
-		
-		SnakeGameServer.snake_board.putRandomBlock = function(){
-			var red_block = f();
-			
-			SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.NEW_BLOCK, {
-		    	new_block: red_block,
-		    }), -1);
-		};
+		SnakeGameServer.snake_board.putRedBlock = SnakeGameServer.putRedBlock;
 	},
 	
 	initMessage: function(SNAKE_ID){
@@ -156,6 +152,11 @@ var SnakeGameServer = {
 		segment.y = y;
 		
 		SnakeGameServer.snake_board.putSegment(segment);
+
+		console.log("RED BLOCK WYSYLAM")
+		SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.NEW_BLOCK, {
+	    	new_block: segment,
+	    }), -1);
 		
 		return segment;
 	},
@@ -167,8 +168,8 @@ var SnakeGameServer = {
 			if(i === snakeID){
 				return;
 			}
-			
-			SnakeGameServer.connections[i].send(JSON.stringify(msg));
+
+			SnakeGameServer.connections[i] && SnakeGameServer.connections[i].send(JSON.stringify(msg));
 		});
 	},
 	

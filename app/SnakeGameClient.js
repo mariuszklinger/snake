@@ -27,7 +27,7 @@ var SnakeGame = {
 		websocket: null,
 			
 		init: function(){
-			var wsUri = "ws://localhost:1337/";
+			var wsUri = "ws://" + SNAKE_SERVER_IP + ":1337/";
 
 			websocket = new WebSocket(wsUri);
 			
@@ -182,6 +182,7 @@ var SnakeGame = {
 				var cb = snake.body[b];
 				
 				(function(cb, b){
+					
 					setTimeout(function(){
 						cb.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
 						cb.color = dead_colors[b] || dead_colors[dead_colors.length - 1];
@@ -189,6 +190,15 @@ var SnakeGame = {
 						SnakeGameBoard.putSegment(cb);
 						SnakeGame.SnakeGameDrawer.update();
 					}, b * 100);
+					
+					setTimeout(function(){
+						cb.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
+						cb.color = Segment.SEGMENT_TYPES.BLANK.color;
+						
+						SnakeGameBoard.putSegment(cb);
+						SnakeGame.SnakeGameDrawer.update();
+					}, 100 * (snake.body.length - b) + snake.body.length * 100);
+					
 				})(cb, b);
 			};
 			
