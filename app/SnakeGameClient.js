@@ -27,19 +27,21 @@ var SnakeGame = {
 		websocket: null,
 			
 		init: function(){
-			var wsUri = "ws://" + SNAKE_SERVER_IP + ":1337/";
+			var wsUri = "ws://" + SNAKE_SERVER_IP;
 
-			websocket = new WebSocket(wsUri);
+			var websocket = new WebSocket(wsUri);
 			
 			websocket.onopen = function(evt) {
 			};
 			
 			websocket.onclose = function(evt) {
 			};
+			
 			websocket.onmessage = function(evt) {
 				SnakeGame.snake && console.info("snake #" + SnakeGame.snake.snakeID + " message:");
 				SnakeGame.SnakeGameClient.dispatchMsg(JSON.parse(evt.data));
 			};
+			
 			websocket.onerror = function(evt) {
 			};
 			
@@ -189,7 +191,7 @@ var SnakeGame = {
 						
 						SnakeGameBoard.putSegment(cb);
 						SnakeGame.SnakeGameDrawer.update();
-					}, b * 100);
+					}, b * 50);
 					
 					setTimeout(function(){
 						cb.type = Segment.SEGMENT_TYPES.DEAD_SNAKE;
@@ -197,7 +199,7 @@ var SnakeGame = {
 						
 						SnakeGameBoard.putSegment(cb);
 						SnakeGame.SnakeGameDrawer.update();
-					}, 100 * (snake.body.length - b) + snake.body.length * 100);
+					}, 50 * (snake.body.length - b) + snake.body.length * 50);
 					
 				})(cb, b);
 			};

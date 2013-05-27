@@ -1,4 +1,4 @@
-<!-- revision #28 -->
+<!-- revision #29 -->
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -9,13 +9,13 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="can" width="700" height="700"></canvas>
+		<canvas id="can" width="700" height="800"></canvas>
 		<script type="text/javascript" src="../shared/SnakeGameCore.js"></script>
 		<script type="text/javascript" src="SnakeGameClient.js"></script>
 		<script type="text/javascript">
 			window.WebSocket = window.WebSocket || window.MozWebSocket;
 		
-			var SNAKE_SERVER_IP = "192.168.0.11";
+			var SNAKE_SERVER_IP = "192.168.0.11:1337";
 			
 			document.addEventListener('DOMContentLoaded', function () {
 				var canvas = document.getElementById("can");

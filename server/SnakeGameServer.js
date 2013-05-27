@@ -2,6 +2,8 @@ var WebSocketServer = require("websocket").server;
 var http = require("http");
 var SnakeGameCore = require("../shared/SnakeGameCore.js");
 
+var colors = require('colors');
+
 var SEGMENT_SIZE = SnakeGameCore.SEGMENT_SIZE;
 var BOARD_W = SnakeGameCore.BOARD_W;
 var BOARD_H = SnakeGameCore.BOARD_H;
@@ -32,6 +34,16 @@ var SnakeGameServer = {
 		SnakeGameServer.putRedBlock();
 		SnakeGameServer.putRedBlock();
 		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
+		SnakeGameServer.putRedBlock();
 		
 		SnakeGameServer.proxyGameBoardMethod();
 
@@ -44,7 +56,7 @@ var SnakeGameServer = {
 			var connection = request.accept(null, request.origin);
 			SnakeGameServer.connections[SNAKE_ID] = connection;
 
-		    console.log("===== CONNECTION ON");
+		    console.log("===== CONNECTION ON".red);
 		    
 		    // snake for connected client
 		    SnakeGameServer.spawnNewSnake(SNAKE_ID);
@@ -69,13 +81,21 @@ var SnakeGameServer = {
 			    }), SNAKE_ID);
 			    
 		    	
-		    	console.log("===== CLOOOOSEEE");
+		    	console.log("===== CLOOOOSEEE".red);
 		    });
 		});
 	},
 	
 	proxyGameBoardMethod: function(){
-		SnakeGameServer.snake_board.putRedBlock = SnakeGameServer.putRedBlock;
+		
+		var old_f = SnakeGameServer.snake_board.snakeGameCollisionDetector.processMove;
+		SnakeGameServer.snake_board.snakeGameCollisionDetector.processMove = function(head){
+			var r = old_f(head);
+			
+			if(r === SnakeGameServer.snake_board.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
+				SnakeGameServer.putRedBlock();
+			}
+		};
 	},
 	
 	initMessage: function(SNAKE_ID){
@@ -153,7 +173,6 @@ var SnakeGameServer = {
 		
 		SnakeGameServer.snake_board.putSegment(segment);
 
-		console.log("RED BLOCK WYSYLAM")
 		SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.NEW_BLOCK, {
 	    	new_block: segment,
 	    }), -1);

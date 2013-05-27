@@ -1,6 +1,6 @@
 var SEGMENT_SIZE = 50;
 var BOARD_W = 700;
-var BOARD_H = 700;
+var BOARD_H = 800;
 
 var BLOCKS_X = BOARD_W / SEGMENT_SIZE;
 var BLOCKS_Y = BOARD_H / SEGMENT_SIZE;
@@ -149,7 +149,8 @@ var SnakeGameBoard = {
 	
 	deleteSnake: function(snake){
 		snake.body.forEach(function(segment){
-			SnakeGameBoard.deleteSegment(segment);
+			//SnakeGameBoard.deleteSegment(segment);
+			segment.type = Segment.SEGMENT_TYPES.BLANK;
 		});
 	},
 	
@@ -208,6 +209,7 @@ var SnakeGameBoard = {
 		var move_result = SnakeGameBoard.snakeGameCollisionDetector.processMove(new_head_segment);
 		
 		if(move_result === SnakeGameBoard.snakeGameCollisionDetector.COLLISION_STATES.SNAKE){
+			SnakeGameBoard.deleteSnake(snake);
 			return false;
 		}
 		
@@ -224,29 +226,25 @@ var SnakeGameBoard = {
 		return true;
 	},
 	
-	putRedBlock: function(){
+	snakeGameCollisionDetector: {
 		
-	},
-	
-	snakeGameCollisionDetector: (function(_snakeGameBoardBuffer){
-		
-		this.COLLISION_STATES = {
+		COLLISION_STATES: {
 			SNAKE: 1,
 			EATABLE_BLOCK: 2,
-		};
+		},
 		
-		this.processMove = function(head){
+		processMove: function(head){
 
 			var block = SnakeGameBoard.getSegment(head.x / SEGMENT_SIZE, head.y / SEGMENT_SIZE);
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					SnakeGameBoard.putRedBlock();
-					return COLLISION_STATES.EATABLE_BLOCK;
+					console.info("\zezarlem cos".green);
+					return SnakeGameBoard.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK;
 					break;
 					
 				case Segment.SEGMENT_TYPES.SNAKE.id:
-					return COLLISION_STATES.SNAKE;
+					return SnakeGameBoard.snakeGameCollisionDetector.COLLISION_STATES.SNAKE;
 					break;
 		
 				case Segment.SEGMENT_TYPES.BLANK.id:
@@ -255,10 +253,8 @@ var SnakeGameBoard = {
 				default:
 					break;
 			}
-		};
-		
-		return this;
-	})(this),
+		},
+	},
 	
 };
 
