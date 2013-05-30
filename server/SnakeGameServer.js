@@ -31,21 +31,8 @@ var SnakeGameServer = {
 		});
 		
 		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
-		SnakeGameServer.putRedBlock();
 		
-		SnakeGameServer.proxyGameBoardMethod();
+		SnakeGameServer.proxyGameBoardMethods();
 
 		wsServer.on("request", function(request) {
 			
@@ -86,15 +73,17 @@ var SnakeGameServer = {
 		});
 	},
 	
-	proxyGameBoardMethod: function(){
+	proxyGameBoardMethods: function(){
 		
-		var old_f = SnakeGameServer.snake_board.snakeGameCollisionDetector.processMove;
+		var old_function = SnakeGameServer.snake_board.snakeGameCollisionDetector.processMove;
 		SnakeGameServer.snake_board.snakeGameCollisionDetector.processMove = function(head){
-			var r = old_f(head);
+			var result = old_function(head);
 			
-			if(r === SnakeGameServer.snake_board.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
+			if(result === SnakeGameServer.snake_board.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK){
 				SnakeGameServer.putRedBlock();
 			}
+			
+			return result;
 		};
 	},
 	
@@ -134,6 +123,7 @@ var SnakeGameServer = {
 		var not_blank = [];
 		
 		this.snake_board.board.forEach(function(row){
+
 			row.forEach(function(segment){
 				if(segment.type.id !== Segment.SEGMENT_TYPES.BLANK.id){
 					not_blank.push(SnakeGameServer.serializeSegment(segment));

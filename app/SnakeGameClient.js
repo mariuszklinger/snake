@@ -142,6 +142,9 @@ var SnakeGame = {
 		
 		init: function(canvas){
 			this.canvas = canvas;
+			this.canvas.width = BOARD_W;
+			this.canvas.height = BOARD_H;
+			
 			this.context = canvas.getContext("2d");
 			this.initDraw();
 		},
