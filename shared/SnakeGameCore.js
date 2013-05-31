@@ -236,7 +236,7 @@ var SnakeGameBoard = {
 		
 		this.updateBuffer(snake);
 		
-		this.printBoard();
+		//this.printBoard();
 		return true;
 	},
 	
@@ -253,7 +253,6 @@ var SnakeGameBoard = {
 			
 			switch (block.type.id) {
 				case Segment.SEGMENT_TYPES.RED_BLOCK.id:
-					console.info("\zezarlem cos".green);
 					return SnakeGameBoard.snakeGameCollisionDetector.COLLISION_STATES.EATABLE_BLOCK;
 					break;
 					

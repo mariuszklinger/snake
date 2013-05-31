@@ -11,9 +11,13 @@ var BOARD_H = SnakeGameCore.BOARD_H;
 var BLOCKS_X = SnakeGameCore.BLOCKS_X;
 var BLOCKS_Y = SnakeGameCore.BLOCKS_Y;
 
+var RED_BLOCKS_AMOUNT = 20;
+
 var Segment = SnakeGameCore.Segment;
 var Snake = SnakeGameCore.Snake;
 var SnakeMessage = SnakeGameCore.SnakeMessage;
+
+var PACKET_ID = 0;
 
 var SnakeGameServer = {
 
@@ -30,7 +34,7 @@ var SnakeGameServer = {
 		    httpServer: server,
 		});
 		
-		SnakeGameServer.putRedBlock();
+		SnakeGameServer.setInitialRedBlock(RED_BLOCKS_AMOUNT);
 		
 		SnakeGameServer.proxyGameBoardMethods();
 
@@ -134,6 +138,12 @@ var SnakeGameServer = {
 		return not_blank;
 	},
 	
+	setInitialRedBlock: function(n){
+		for(var i = 0; i < n; i++){
+			SnakeGameServer.putRedBlock();
+		}
+	},
+	
 	removeSnake: function(snakeID){
 		
 		var snake = this.clients[snakeID];
@@ -177,9 +187,13 @@ var SnakeGameServer = {
 			if(i === snakeID){
 				return;
 			}
+			
+			msg.PACKET_ID = PACKET_ID;
 
 			SnakeGameServer.connections[i] && SnakeGameServer.connections[i].send(JSON.stringify(msg));
 		});
+		
+		console.info(("PACKET ID:" + ++PACKET_ID + "\t#" + snakeID).green);
 	},
 	
 	parseMessage: function(data, snakeID){

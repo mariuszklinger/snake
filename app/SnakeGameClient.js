@@ -35,6 +35,8 @@ var SnakeGame = {
 			};
 			
 			websocket.onclose = function(evt) {
+				alert("CONNECTION LOST");
+				SnakeGame.SnakeGameDrawer.die(SnakeGame.snake);
 			};
 			
 			websocket.onmessage = function(evt) {
@@ -49,6 +51,8 @@ var SnakeGame = {
 		},
 		
 		dispatchMsg: function(obj){
+			
+			console.warn(obj.PACKET_ID);
 			switch (obj.type.id) {
 				case SnakeMessage.TYPES.INIT.id:
 					
@@ -95,7 +99,7 @@ var SnakeGame = {
 					
 					var to_remove_snakeID = obj.msg.snakeID;
 					var snake = SnakeGame.clients[to_remove_snakeID];
-					
+					SnakeGame.SnakeGameDrawer.die(snake);
 					SnakeGameBoard.deleteSnake(snake);
 					SnakeGame.clients[to_remove_snakeID] = undefined;
 					SnakeGame.SnakeGameDrawer.update();
