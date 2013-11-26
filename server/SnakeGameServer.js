@@ -11,7 +11,7 @@ var BOARD_H = SnakeGameCore.BOARD_H;
 var BLOCKS_X = SnakeGameCore.BLOCKS_X;
 var BLOCKS_Y = SnakeGameCore.BLOCKS_Y;
 
-var RED_BLOCKS_AMOUNT = 20;
+var RED_BLOCKS_AMOUNT = 110;
 
 var Segment = SnakeGameCore.Segment;
 var Snake = SnakeGameCore.Snake;
@@ -30,7 +30,7 @@ var SnakeGameServer = {
 		var server = http.createServer(function(request, response){});
 		server.listen(1337, function(){});
 
-		wsServer = new WebSocketServer({
+		var wsServer = new WebSocketServer({
 		    httpServer: server,
 		});
 		
@@ -182,18 +182,22 @@ var SnakeGameServer = {
 	
 	// sending new messages to all clients except one with snakeID
 	broadcastMessage: function(msg, snakeID){
+		
+		var colors = ["green", "magenta", "yellow"];
+		
+		var log = "PACKET ID:" + ++PACKET_ID + "\t#" + snakeID;
 
 		this.clients.forEach(function(c, i){
 			if(i === snakeID){
 				return;
 			}
 			
-			msg.PACKET_ID = PACKET_ID;
+			msg.log = log;
 
 			SnakeGameServer.connections[i] && SnakeGameServer.connections[i].send(JSON.stringify(msg));
 		});
 		
-		console.info(("PACKET ID:" + ++PACKET_ID + "\t#" + snakeID).green);
+		console.info(log[colors[snakeID] || "grey"]);
 	},
 	
 	parseMessage: function(data, snakeID){

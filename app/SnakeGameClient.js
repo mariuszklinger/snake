@@ -40,7 +40,7 @@ var SnakeGame = {
 			};
 			
 			websocket.onmessage = function(evt) {
-				SnakeGame.snake && console.info("snake #" + SnakeGame.snake.snakeID + " message:");
+				//SnakeGame.snake && console.info("snake #" + SnakeGame.snake.snakeID + " message:");
 				SnakeGame.SnakeGameClient.dispatchMsg(JSON.parse(evt.data));
 			};
 			
@@ -51,13 +51,12 @@ var SnakeGame = {
 		},
 		
 		dispatchMsg: function(obj){
-			
-			console.warn(obj.PACKET_ID);
+
 			switch (obj.type.id) {
 				case SnakeMessage.TYPES.INIT.id:
 					
 					SnakeGame.snake = new Snake([obj.msg.head]);
-					console.warn(" - INIT - HELLO, snakeID = " + SnakeGame.snake.snakeID)
+					//console.warn(" - INIT - HELLO, snakeID = " + SnakeGame.snake.snakeID)
 					console.warn(obj.msg)
 					SnakeGame.SnakeGameClient.updateBoard(obj.msg.board);
 					obj.msg.clients.forEach(function(s){
@@ -71,8 +70,8 @@ var SnakeGame = {
 					
 				case SnakeMessage.TYPES.MOVE.id:
 					
-					console.log("MOVE")
-					console.log(obj.msg)
+					//console.log("MOVE")
+					//console.log(obj.msg)
 					var snake_to_move = SnakeGame.clients[obj.msg.snakeID];
 
 					if(!snake_to_move.move(obj.msg.move)){
@@ -85,8 +84,8 @@ var SnakeGame = {
 					break;
 	
 				case SnakeMessage.TYPES.NEW_SNAKE.id:
-					console.info("NEW SNAKE SWITCH:");
-					console.info(obj);
+					//console.info("NEW SNAKE SWITCH:");
+					//console.info(obj);
 					var new_snake = new Snake(obj.msg.snake.body);
 					SnakeGame.clients[obj.msg.snake.snakeID] = new_snake;
 					SnakeGameBoard.updateBuffer(new_snake);
@@ -94,8 +93,8 @@ var SnakeGame = {
 					break;
 				
 				case SnakeMessage.TYPES.REMOVE_SNAKE.id:
-					console.info("REMOVE SNAKE SWITCH:");
-					console.info(obj);
+					///console.info("REMOVE SNAKE SWITCH:");
+					//console.info(obj);
 					
 					var to_remove_snakeID = obj.msg.snakeID;
 					var snake = SnakeGame.clients[to_remove_snakeID];
@@ -106,8 +105,8 @@ var SnakeGame = {
 					break;
 					
 				case SnakeMessage.TYPES.NEW_BLOCK.id:
-					console.info("NEW RED BLOCK SWITCH:");
-					console.info(obj);
+					//console.info("NEW RED BLOCK SWITCH:");
+					//console.info(obj);
 					
 					var s = new Segment(obj.msg.new_block.x, obj.msg.new_block.y, Segment.SEGMENT_TYPES.RED_BLOCK, null);
 					
@@ -116,7 +115,7 @@ var SnakeGame = {
 					break;
 					
 				default:
-					console.info("DEFAULT SWITCH:");
+					//console.info("DEFAULT SWITCH:");
 					console.info(obj);
 					break;
 				}

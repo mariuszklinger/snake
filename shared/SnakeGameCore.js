@@ -1,6 +1,6 @@
 var SEGMENT_SIZE = 20;
-var BOARD_W = 500;
-var BOARD_H = 500;
+var BOARD_W = 1000;
+var BOARD_H = 800;
 
 var BLOCKS_X = BOARD_W / SEGMENT_SIZE;
 var BLOCKS_Y = BOARD_H / SEGMENT_SIZE;
@@ -94,6 +94,7 @@ var Snake = function(body){ //TODO snake could be instantined as a body array
 	
 	this.body = body;
 	this.snakeID = body[0].snakeID;
+	this.color = "#5CA315";
 
 	this.SNAKE_STATES = {
 		LIVE: 1,

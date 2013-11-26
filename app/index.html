@@ -1,21 +1,29 @@
-<!-- revision #31 -->
+<!-- revision #32 -->
 <!DOCTYPE HTML>
 <html>
 	<head>
 		<style>
-			canvas{
+			canvas#can{
 				border: 1px solid #000;
+			}
+
+			.wrapper{
+				margin: 0 auto;
+				width: 1000px;
+				height: 800px;
 			}
 		</style>
 	</head>
 	<body>
-		<canvas id="can" width="700" height="800"></canvas>
+		<div class="wrapper">
+			<canvas id="can"></canvas>
+		</div>
 		<script type="text/javascript" src="../shared/SnakeGameCore.js"></script>
 		<script type="text/javascript" src="SnakeGameClient.js"></script>
 		<script type="text/javascript">
 			window.WebSocket = window.WebSocket || window.MozWebSocket;
 		
-			var SNAKE_SERVER_IP = "192.168.0.11:1337";
+			var SNAKE_SERVER_IP = "127.0.0.1:1337";
 			
 			document.addEventListener('DOMContentLoaded', function () {
 				var canvas = document.getElementById("can");
