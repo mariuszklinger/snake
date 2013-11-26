@@ -40,7 +40,6 @@ var SnakeGame = {
 			};
 			
 			websocket.onmessage = function(evt) {
-				//SnakeGame.snake && console.info("snake #" + SnakeGame.snake.snakeID + " message:");
 				SnakeGame.SnakeGameClient.dispatchMsg(JSON.parse(evt.data));
 			};
 			
@@ -76,6 +75,7 @@ var SnakeGame = {
 
 					if(!snake_to_move.move(obj.msg.move)){
 						SnakeGame.SnakeGameDrawer.die(snake_to_move);
+						SnakeGame.clients[obj.msg.snakeID] = undefined;
 					}
 					else{
 						SnakeGame.SnakeGameDrawer.update();

@@ -112,6 +112,10 @@ Snake.prototype.getHead = function(){
 	return this.body[0];
 };
 
+Snake.prototype.isAlive = function(){
+	return this.status === this.SNAKE_STATES.LIVE;
+}
+
 Snake.prototype.move = function(move){
 	var current_head = this.getHead();
 	var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1], Segment.SEGMENT_TYPES.SNAKE);

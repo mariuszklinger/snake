@@ -65,12 +65,15 @@ var SnakeGameServer = {
 		    connection.on("close", function(connection) {
 		    	SnakeGameServer.removeSnake(SNAKE_ID);
 		    	SnakeGameServer.connections[SNAKE_ID] = null;
-		    	
-			    // notice others clients about new snake 
-			    SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.REMOVE_SNAKE, {
-			    	snakeID: SNAKE_ID,
-			    }), SNAKE_ID);
-			    
+
+		    	// if clients disconnect when snake was alive
+		    	if(SnakeGameServer.clients[SNAKE_ID].isAlive()){
+
+				    // notice others clients about new snake 
+				    SnakeGameServer.broadcastMessage(new SnakeMessage(SnakeMessage.TYPES.REMOVE_SNAKE, {
+				    	snakeID: SNAKE_ID,
+				    }), SNAKE_ID);
+			    }
 		    	
 		    	console.log("===== CLOOOOSEEE".red);
 		    });
