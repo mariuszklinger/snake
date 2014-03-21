@@ -144,18 +144,6 @@ var SnakeGameBoard = {
         return board;
     })(),
     
-    printBoard: function(){
-        
-        this.board.forEach(function(row){
-            var l = "";
-            row.forEach(function(segment){
-                l += (segment.type.id !== 1) ? segment.type.id : '.';
-            });
-            console.info(l);
-        });
-        console.info("--------------");
-    },
-    
     deleteSegment: function(s){
         var to_erase = this.board[s.y / SEGMENT_SIZE][s.x / SEGMENT_SIZE];
         to_erase.type = Segment.SEGMENT_TYPES.BLANK;
@@ -166,7 +154,6 @@ var SnakeGameBoard = {
     
     deleteSnake: function(snake){
         snake.body.forEach(function(segment){
-            //SnakeGameBoard.deleteSegment(segment);
             segment.type = Segment.SEGMENT_TYPES.BLANK;
         });
     },
