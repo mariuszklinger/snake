@@ -1,3 +1,4 @@
 .project
 .settings/*
 server/node_modules/*
+node_modules/
