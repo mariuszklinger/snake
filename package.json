@@ -1,0 +1,29 @@
+{
+  "name": "snake",
+  "version": "0.0.0",
+  "description": "Multiplayer web-based snake game",
+  "main": "server/SnakeGameServer.js",
+  "dependencies": {
+    "colors": "~0.6.2",
+    "websocket": "~1.0.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rinz/snake.git"
+  },
+  "keywords": [
+    "html5",
+    "websocket",
+    "multiplayer"
+  ],
+  "author": "Rinz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rinz/snake/issues"
+  },
+  "homepage": "https://github.com/rinz/snake"
+}

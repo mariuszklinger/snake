@@ -1,4 +1,4 @@
-var SnakeGame = 
+var SnakeGame = {
 
     init: function(canvas){
         SnakeGame.SnakeGameClient.init();
