@@ -58,6 +58,7 @@ var SnakeGame = {
                     SnakeGame.SnakeGameClient.updateBoard(obj.msg.board);
                     obj.msg.clients.forEach(function(s){
                          SnakeGame.clients[s.snakeID] = new Snake(s.body);
+                         SnakeGame.clients[s.snakeID].snakeID = s.snakeID;
                     });
                     
                     SnakeGameBoard.updateBuffer(SnakeGame.snake);
