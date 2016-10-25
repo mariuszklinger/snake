@@ -119,7 +119,6 @@ Snake.prototype.isAlive = function(){
 Snake.prototype.move = function(move){
     var current_head = this.getHead();
     var new_head_segment = new Segment(current_head.x + move[0], current_head.y + move[1], Segment.SEGMENT_TYPES.SNAKE);
-    
     return SnakeGameBoard.moveSnake(this, new_head_segment);
 };
 
@@ -194,11 +193,13 @@ var SnakeGameBoard = {
     },
     
     updateBuffer: function(snake){
-        var colors = ["#5CA315", "#69B81A",  "#74CC1D", "#81DE23", "#8BF026", "#92FA2A", "#A2FF45"];
+        var shades = [", 77.2%, 36.1%)", ", 75.2%, 41.2%)", ", 75.1%, 45.7%)", ", 73.9%, 50.4%)", ", 87.1%, 54.5%)", ", 95.4%, 57.3%)", ", 100%, 63.5%)"];
+        var hue = (snake.snakeID + 1) * 50;
         
         for(var i = 0; i < snake.body.length; i++){
             var current_segment = snake.body[i];
-            current_segment.color = colors[i] || colors[colors.length - 1];
+            var shade = shades[i] || shades[shades.length - 1];
+            current_segment.color = 'hsl(' + hue + shade;
             
             this.putSegment(current_segment);
         };
